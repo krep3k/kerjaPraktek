@@ -142,20 +142,23 @@ export default function DataGuruPage() {
                         <h2 className="text-xl font-bold text-gray-900 mb-6">{selectedTeacher ? "Edit Pofile Guru" : "Tambah Akun Guru Baru"}</h2>
                         <form action="" onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label htmlFor="" className="block text-sm font-semibold text-gray-700 mb-1">Photo profile <input type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" /></label>
+                                <label htmlFor="pp" className="block text-sm font-semibold text-gray-700 mb-1">Photo profile</label>
+                                <input id="pp" type="file" accept="image/*" onChange={handleFileChange} className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
                                 {photoBase64 && <img src={photoBase64} alt="Teacher profile preview" className="mt-3 w-16 h-16 rounded-full object-cover border" />}
                             </div>
                             <div>
-                                <label htmlFor="" className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap <input type="text" name="name" placeholder="..." required defaultValue={selectedTeacher?.name || ""} className="..." /></label>
+                                <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
+                                <input id="name" type="text" name="name" placeholder="..." required defaultValue={selectedTeacher?.name || ""} className="..." />
                             </div>
                             <div>
-                                <label htmlFor="" className="block text-sm font-semibold text-gray-700 mb-1">Email <input type="email" name="email" required placeholder="..." defaultValue={selectedTeacher?.email || ""} className="..." /></label>
+                                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+                                <input id="email" type="email" name="email" required placeholder="..." defaultValue={selectedTeacher?.email || ""} className="..." />
                             </div>
                             <div>
-                                <label htmlFor="" className="block text-sm font-semibold text-gray-700 mb-1">
+                                <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-1">
                                     Password {selectedTeacher && <span className="text-gray-400 font-normal">(Kosongkan jika tidak diubah)</span>}
-                                    <input type="password" name="password" placeholder="..." required={!selectedTeacher} className="..." />
                                 </label>
+                                <input id="password" type="password" name="password" placeholder="..." required={!selectedTeacher} className="..." />
                             </div>
                             {selectedTeacher && (
                                 <div>

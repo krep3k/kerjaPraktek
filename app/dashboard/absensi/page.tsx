@@ -90,9 +90,8 @@ export default function AbsensiPage() {
                         {["A", "B", "C"].map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                 </label></div>
-                <div className="flex-1"><label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal
-                    <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50" />
-                </label></div>
+                <div className="flex-1"><label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal</label></div>
+                <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50" />
             </div>
             {loading ? <div className="text-center p-10">Memuat data...</div> : (
                 <table className="w-full text-left text-sm border-collapse">
@@ -118,9 +117,8 @@ export default function AbsensiPage() {
                                     </select>
                                 </td>
                                 <td className="p-3">
-                                    <label htmlFor="">
-                                        <input type="text" placeholder="Isi alasan jika tidak hadir..." value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir"} className="w-full border p-1 rounded-md disabled:bg-gray-100 disabled:placeholder-transparent" />
-                                    </label>
+                                    <label htmlFor="ket"></label>
+                                    <input id="ket" type="text" placeholder="Isi alasan jika tidak hadir..." value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir"} className="w-full border p-1 rounded-md disabled:bg-gray-100 disabled:placeholder-transparent" />
                                 </td>
                             </tr>
                         ))}

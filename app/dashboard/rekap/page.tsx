@@ -146,9 +146,8 @@ export default function RekapDataPage() {
                     </select>
                 </div>
                 <div className="w-48">
-                    <label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal
-                        <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-white" />
-                    </label>
+                    <label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal</label>
+                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-white" />
                 </div>
                 {activeTab === "nilai" && (
                     <>

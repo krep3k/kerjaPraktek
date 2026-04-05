@@ -31,7 +31,7 @@ export default function LoginPage(){
                 router.push("/dashboard");
                 router.refresh();
             }
-        } catch (err) {
+        } catch (error) {
             setError("terjadi kesalahan");
             setLoading(false);
         }
@@ -55,10 +55,12 @@ export default function LoginPage(){
                 )}
                 <form action="" onSubmit={handleSubmit} className="space-y-5">
                     <div>
-                        <label htmlFor="" className="block text-sm font-medium text-gray-700 mb-1">Email/Username <input type="email" name="email" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Email" /></label>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email/Username</label>
+                        <input id="email" type="email" name="email" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Email" />
                     </div>
                     <div>
-                        <label htmlFor="" className="block text-sm font-medium text-gray-700 mb-1">Password <input type="password" name="password" required placeholder="Password" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" /></label>
+                        <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password </label>
+                        <input id="password" type="password" name="password" required placeholder="Password" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" />
                     </div>
                     <button type="submit" disabled={loading} className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition disabled:opacity-70 disabled:cursor-not-allowed">
                         {loading ? "Memeriksa Kredensial..." : "Masuk ke Dashboard"}

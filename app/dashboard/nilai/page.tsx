@@ -96,9 +96,8 @@ export default function RekapNilaiPage() {
                     </label>
                 </div>
                 <div>
-                    <label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal
-                        <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50" />
-                    </label>
+                    <label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal</label>
+                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50" />
                 </div>
             </div>
 
@@ -117,9 +116,8 @@ export default function RekapNilaiPage() {
                                 <td className="p-3">{idx + 1}</td>
                                 <td className="p-3 font-medium">{s.name}</td>
                                 <td className="p-3 text-center">
-                                    <label htmlFor="nilai">
-                                        <input id="nilai" type="number" min={0} max={100} value={nilaiData[s._id] || ""} onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})} className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500" placeholder="Nilai" />
-                                    </label>
+                                    <label htmlFor="nilai"></label>
+                                    <input id="nilai" type="number" min={0} max={100} value={nilaiData[s._id] || ""} onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})} className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500" placeholder="Nilai" />
                                 </td>
                             </tr>
                         ))}

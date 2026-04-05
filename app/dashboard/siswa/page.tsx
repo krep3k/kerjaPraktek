@@ -157,20 +157,17 @@ export default function SiswaPage() {
                         <form action="" onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div className="flex gap-4">
                                 <div className="flex-1">
-                                    <label htmlFor="" className="block text-sm font-medium text-gray-700 mb-1">NIS
-                                        <input type="text" value={formData.nis} onChange={(e) => setFormData({...formData, nis: e.target.value})} required className="w-full border p-2 rounded-lg" />
-                                    </label>
+                                    <label htmlFor="nis" className="block text-sm font-medium text-gray-700 mb-1">NIS</label>
+                                    <input id="nis" type="text" value={formData.nis} onChange={(e) => setFormData({...formData, nis: e.target.value})} required className="w-full border p-2 rounded-lg" />
                                 </div>
                                 <div className="flex-1">
-                                    <label htmlFor="" className="block text-sm font-medium text-gray-700 mb-1">NISN
-                                        <input type="text" value={formData.nisn} onChange={(e) => setFormData({...formData, nisn: e.target.value})} className="w-full border p-2 rounded-lg" />
-                                    </label>
+                                    <label htmlFor="nisn" className="block text-sm font-medium text-gray-700 mb-1">NISN</label>
+                                    <input id="nisn" type="text" value={formData.nisn} onChange={(e) => setFormData({...formData, nisn: e.target.value})} className="w-full border p-2 rounded-lg" />
                                 </div>
                             </div>
                             <div>
-                                <label htmlFor="" className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap
-                                    <input type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value.toUpperCase()})} className="w-full border p-2 rounded-lg" />
-                                </label>
+                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                <input id="name" type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value.toUpperCase()})} className="w-full border p-2 rounded-lg" />
                             </div>
                             <div className="flex gap-4">
                                 <div className="flex-1">
