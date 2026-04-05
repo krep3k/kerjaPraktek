@@ -1,0 +1,131 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import { useState, useEffect } from "react";
+import { getStudentByClass, getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/lib/actions";
+import { Save, CheckCircle2 } from "lucide-react";
+
+export default function RekapNilaiPage() {
+    const [kelas, setKelas] = useState<number>(1);
+    const [rombel, setRombel] = useState<string>("A");
+    const [semester, setSemester] = useState<string>("Ganjil");
+    const [mapel, setMapel] = useState<string>("Matematika");
+    const [jenisNilai, setJenisNilai] = useState("Ulangan Harian");
+    const [tanggal, setTanggal] = useState(new Date().toISOString().split("T")[0]);
+    const [students, setStudents] = useState<any[]>([]);
+    const [nilaiData, setNilaiData] = useState<any>({});
+    const [loading, setLoading] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const daftarMapel = ["Matematika", "Bahasa Indonesia", "Bahasa Inggris", "Ilmu Pengetahuan Alam (IPA)", "Ilmu Pengetahuan Sosisal (IPS)", "Pendidikan Agama", "Pendidikan Pancasila dan Kewarganegaraan (PPKn)", "Seni Budaya", "Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)"];
+    
+    useEffect(() => {
+        const loadData = async () => {
+            setLoading(true);
+            const studentList = await getStudentsFiltered(kelas, rombel);
+            setStudents(studentList);
+            const records = await getGNilaiRecord(kelas, rombel, semester, mapel, jenisNilai, tanggal);
+            const recordMap: any = {};
+            studentList.forEach((s: any) => {recordMap[s._id] = 0;});
+            records.forEach((r: any) => {recordMap[r.studentId] = r.nilai;});
+            setNilaiData(recordMap);
+            setLoading(false);
+        };
+        loadData();
+    }, [kelas, rombel, semester, mapel, jenisNilai, tanggal]);
+
+    const handleSave = async () => {
+        setLoading(true);
+        const dataToSave = students.map(s => ({
+            studentId: s._id,
+            nilai: Number(nilaiData[s._id]) || 0
+        }));
+        const res = await saveBulkNilai(dataToSave, kelas, rombel, semester, mapel, jenisNilai, tanggal);
+        if(res.error){
+            alert("Gagal menyimpan data:" + res.error);
+        } else {
+            alert(`Data nilai ${jenisNilai} tanggal ${tanggal} berhasil disimpan!`);
+            setLoading(false);
+        }
+    };
+    return (
+        <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
+            <div className="flex justify-between items-center border-b pb-4">
+                <h1 className="text-2xl font-bold text-gray-800">Record input nilai</h1>
+                <button title="save" onClick={handleSave} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <Save className="w-5 h-5">Simpan Nilai</Save>
+                </button>
+            </div>
+            <div className="grid grid-cols-5 gap-4">
+                <div className="block text-sm font-semibold text-blue-700 mb-1">Kelas
+                    <label htmlFor="">
+                        <select title="kelas" name="" id="" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border p-2 rounded-lg bg-blue-50">
+                            {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
+                        </select>
+                    </label>
+                </div>
+                <div className="block text-sm font-semibold text-blue-700 mb-1">Rombel
+                    <label htmlFor="">
+                        <select title="rombel" name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                            {["A","B","C"].map(r => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                    </label>
+                </div>
+                <div className="block text-sm font-semibold text-blue-700 mb-1">Semester
+                    <label htmlFor="">
+                        <select title="semester" name="" id="" value={semester} onChange={e => setSemester(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                            <option value="Ganjil">Ganjil</option>
+                            <option value="Genap">Genap</option>
+                        </select>
+                    </label>
+                </div>
+                <div className="block text-sm font-semibold text-blue-700 mb-1">Mata Pelajaran
+                    <select title="mapel" name="" id="" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                        <option value="Matematika">Matematika</option>
+                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
+                        <option value="IPA">IPA</option>
+                    </select>
+                </div>
+                <div>
+                    <label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Jenis Penilaian
+                        <select name="" id="" value={jenisNilai} onChange={e => setJenisNilai(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                            <option value="Tugas">Tugas</option>
+                            <option value="UH">Ulangan Harian</option>
+                            <option value="UTS">UTS</option>
+                            <option value="UAS">UAS</option>
+                        </select>
+                    </label>
+                </div>
+                <div>
+                    <label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal
+                        <input type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50" />
+                    </label>
+                </div>
+            </div>
+
+            {loading ? <div className="text-center p-10">Memuat data...</div> : (
+                <table className="w-full text-left text-sm border-collapse mt-4">
+                    <thead className="bg-gray-100 border-b">
+                        <tr>
+                            <th className="p-3 w-16">No</th>
+                            <th className="p-3">Nama</th>
+                            <th className="p-3 w-48 text-center">Input Nilai</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {students.map((s, idx) => (
+                            <tr key={s._id} className="border-b hover:bg-gray-50">
+                                <td className="p-3">{idx + 1}</td>
+                                <td className="p-3 font-medium">{s.name}</td>
+                                <td className="p-3 text-center">
+                                    <label htmlFor="nilai">
+                                        <input id="nilai" type="number" min={0} max={100} value={nilaiData[s._id] || ""} onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})} className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500" placeholder="Nilai" />
+                                    </label>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            )}
+        </div>
+    );
+}
