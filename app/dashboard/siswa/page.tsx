@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getStudentsFiltered, addStudents, updateStudents, deleteStudent } from "@/lib/actions";
-import { Plus, Edit, Trash2, X } from "lucide-react";
+import { PlusCircle, Edit, Trash2, X } from "lucide-react";
 
 export default function SiswaPage() {
     const {data: session} = useSession();
@@ -86,30 +86,30 @@ export default function SiswaPage() {
                 </div>
                 {isAdmin && (
                     <button onClick={() => handleOpenModal()} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" title="plus">
-                        <Plus className="w-5 h-5">Tambah Siswa</Plus>
+                        <PlusCircle className="w-5 h-5">Tambah Siswa</PlusCircle>
                     </button>
                 )}
             </div>
-            <div className="bg-white p-4 rounded-xl border border-gray-200 flex gap-4">
-                <div className="flex-1 max-w-xs">
+            <div className="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6 shadow-sm">
+                <div className="flex flex-col min-w-[150px]">
                     <label htmlFor="filterKelas" className="block text-sm font-semibold text-gray-700 mb-1">
                         Kelas
                     </label>
-                    <select id="filterKelas" value={filterKelas} onChange={(e) => setFilterKelas(Number(e.target.value))}>
+                    <select id="filterKelas" value={filterKelas} onChange={(e) => setFilterKelas(Number(e.target.value))} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
                     </select>
                 </div>
                 <div className="flex-1 max-w-xs">
                     <label htmlFor="filterRombel" className="block text-sm font-semibold text-gray-700 mb-1">Pilih Rombel</label>
-                    <select name="rombel" id="filterRombel" value={filterRombel} onChange={(e) => setFilterRombel(e.target.value)} className="w-full border p-2 rounded-lg">
+                    <select name="rombel" id="filterRombel" value={filterRombel} onChange={(e) => setFilterRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         {availableRombels.map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                 </div>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
                 {loading ? <div className="p-10 text-center">Memuat data...</div> : (
-                    <table className="w-full text-left text-sm text-gray-600">
-                        <thead className="bg-gray-50 border-b border-gray-200 font-semibold uppercase">
+                    <table className="w-full text-left text-sm text-gray-600 min-w-[800px]">
+                        <thead className="bg-gray-50 border-b border-gray-200 text-gray-700 uppercase font-semibold">
                             <tr>
                                 <th className="px-6 py-4 w-16">No</th>
                                 <th className="px-6 py-4">NIS</th>

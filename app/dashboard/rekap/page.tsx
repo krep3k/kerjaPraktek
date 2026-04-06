@@ -135,32 +135,32 @@ export default function RekapDataPage() {
                     <label htmlFor="kelas" className="block text-sm font-semibold text-blue-700 mb-1">
                         Kelas
                     </label>
-                    <select name="kelas" id="kelas" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border p-2 rounded-lg bg-white">
+                    <select name="kelas" id="kelas" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         {[1, 2, 3, 4, 5, 6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
                     </select>
                 </div>
                 <div className="w-32">
                     <label htmlFor="rombel" className="block text-sm font-semibold text-blue-700 mb-1">Rombel</label>
-                    <select name="rombel" id="rombel" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border p-2 rounded-lg bg-white">
+                    <select name="rombel" id="rombel" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         {["A", "B", "C"].map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                 </div>
                 <div className="w-48">
                     <label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal</label>
-                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-white" />
+                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium" />
                 </div>
                 {activeTab === "nilai" && (
                     <>
                         <div className="w-40">
                             <label htmlFor="semester" className="block text-sm font-semibold mb-1 text-gray-700">Semester</label>
-                            <select name="semester" id="semester" value={semester} onChange={e => setSemester(e.target.value)} className="w-full border p-2 rounded-lg bg-white">
+                            <select name="semester" id="semester" value={semester} onChange={e => setSemester(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                                 <option value="Ganjil">Ganjil</option>
                                 <option value="Genap">Genap</option>
                             </select>
                         </div>
                         <div className="w-48">
                             <label htmlFor="mapel" className="block text-sm font-semibold mb-1 text-gray-700">Mata Pelajaran</label>
-                            <select name="mapel" id="mapel" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border p-2 rounded-lg bg-white">
+                            <select name="mapel" id="mapel" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                                 <option value="Matematika">Matematika</option>
                                 <option value="BI">Bahasa Indonesia</option>
                                 <option value="IPA">IPA</option>
@@ -168,7 +168,7 @@ export default function RekapDataPage() {
                         </div>
                         <div className="w-48">
                             <label htmlFor="nilai" className="block text-sm font-semibold mb-1 text-gray-700">Jenis Nilai</label>
-                            <select name="nilai" id="nilai" value={jenisNilai} onChange={e => setJenisNilai(e.target.value)} className="w-full border p-2 rounded-lg bg-white">
+                            <select name="nilai" id="nilai" value={jenisNilai} onChange={e => setJenisNilai(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                                 <option value="Tugas">Tugas</option>
                                 <option value="UH">Ulangan Harian</option>
                                 <option value="UTS">UTS</option>

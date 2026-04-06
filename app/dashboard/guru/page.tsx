@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getTeacher, saveTeacher, deleteTeacher } from "@/lib/actions";
-import { PlusIcon, User as UserIcon, Pencil, Trash2, X } from "lucide-react";
+import { PlusIcon, User as UserIcon, Pencil, Trash2, X, PlusCircle } from "lucide-react";
 
 interface Teacher {
     _id: string;
@@ -80,13 +80,12 @@ export default function DataGuruPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Data Guru</h1>
                     <p className="text-gray-500 text-sm mt-1">Kelola akun dan profile guru yang terhormat</p>
                 </div>
-                <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2 bg-blue-600 text-white font-medium px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-                    <PlusIcon className="p-6 w-6 text-black"></PlusIcon>
-                    <span className="text-white">Tambah Guru</span>
+                <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 ease-in-out active:scale-95">
+                    <PlusCircle color="#ffffff" size={22} strokeWidth={2.5}></PlusCircle>
                 </button>
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
-                <table className="w-full text-left text-sm text-gray-600">
+            <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
+                <table className="w-full text-left text-sm text-gray-600 min-w-[800px]">
                     <thead className="bg-gray-50 border-b border-gray-200 text-gray-700 uppercase font-semibold">
                         <tr>
                             <th className="px-6 py-4">Profil</th>

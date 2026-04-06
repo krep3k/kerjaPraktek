@@ -81,17 +81,17 @@ export default function AbsensiPage() {
             </div>
             <div className="flex gap-4">
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Kelas
-                    <select name="" id="" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border p-2 rounded-lg bg-blue-50">
+                    <select name="" id="" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         {[1, 2, 3, 4, 5, 6].map(k => <option key={k} value={k}>{k}</option>)}
                     </select>
                 </label></div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Rombel
-                    <select name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                    <select name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         {["A", "B", "C"].map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                 </label></div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal
-                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50" />
+                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium" />
                 </label></div>
             
             </div>

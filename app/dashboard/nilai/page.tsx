@@ -55,31 +55,31 @@ export default function RekapNilaiPage() {
                     <Save className="w-5 h-5">Simpan Nilai</Save>
                 </button>
             </div>
-            <div className="grid grid-cols-5 gap-4">
+            <div className="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-xl border mb-6">
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Kelas
                     <label htmlFor="">
-                        <select title="kelas" name="" id="" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border p-2 rounded-lg bg-blue-50">
+                        <select title="kelas" name="" id="" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                             {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
                         </select>
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Rombel
                     <label htmlFor="">
-                        <select title="rombel" name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                        <select title="rombel" name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                             {["A","B","C"].map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Semester
                     <label htmlFor="">
-                        <select title="semester" name="" id="" value={semester} onChange={e => setSemester(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                        <select title="semester" name="" id="" value={semester} onChange={e => setSemester(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                             <option value="Ganjil">Ganjil</option>
                             <option value="Genap">Genap</option>
                         </select>
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Mata Pelajaran
-                    <select title="mapel" name="" id="" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                    <select title="mapel" name="" id="" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         <option value="Matematika">Matematika</option>
                         <option value="Bahasa Indonesia">Bahasa Indonesia</option>
                         <option value="IPA">IPA</option>
@@ -87,7 +87,7 @@ export default function RekapNilaiPage() {
                 </div>
                 <div>
                     <label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Jenis Penilaian
-                        <select name="" id="" value={jenisNilai} onChange={e => setJenisNilai(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50">
+                        <select name="" id="" value={jenisNilai} onChange={e => setJenisNilai(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                             <option value="Tugas">Tugas</option>
                             <option value="UH">Ulangan Harian</option>
                             <option value="UTS">UTS</option>
@@ -97,7 +97,7 @@ export default function RekapNilaiPage() {
                 </div>
                 <div>
                     <label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal</label>
-                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border p-2 rounded-lg bg-blue-50" />
+                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium" />
                 </div>
             </div>
 
