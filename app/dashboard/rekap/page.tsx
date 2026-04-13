@@ -202,7 +202,7 @@ export default function RekapDataPage() {
                             {tableData.length > 0 ? tableData.map((row) => (
                                 <tr key={row.nis} className="border-b hover:bg-gray-50">
                                     <td className="p-3 text-center">{row.no}</td>
-                                    <td className="p-3 text-gray-600 font-mono">{row.nis}</td>
+                                    <td className="p-3 text-gray-600 tabular-nums">{row.nis}</td>
                                     <td className="p-3 font-medium">{row.nama}</td>
                                     {activeTab === "absensi" ? (
                                         <>

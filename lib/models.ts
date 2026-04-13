@@ -5,8 +5,15 @@ const UserSchema = new Schema({
     password: {type: String, required: true},
     role: {type: String, enum: ["admin", "guru"], default: "guru"},
     profilePicture: {type: String, default: ""},
-    status: {type: String, enum: ["aktif", "tidak aktif"], default: "active"},
-}, {timestamps: true});
+    idGuru: { type: String, default: "" },
+    nip: { type: String, default: "" },
+    nuptk: { type: String, default: "" },
+    jenisKelamin: { type: String, enum: ["Laki-laki", "Perempuan"], default: "Laki-laki" },
+    noTelp: { type: String, default: "" },
+    pendidikan: { type: String, default: "" },
+    statusKepegawaian: { type: String, default: "" },
+    status: {type: String, enum: ["aktif", "nonaktif"], default: "aktif"},
+}, {timestamps: true, strict: false});
 
 const StudentSchema = new Schema({
     nis: {type: String, required: true, unique: true},
@@ -32,15 +39,21 @@ const NilaiSchema = new mongoose.Schema({
     score: {type: Number, required: true, min: 0, max: 100},
 }, {timestamps: true});
 
-const PromotionHistorySchema = new Schema({
-    date: {type: Date, default: Date.now},
-    promotedStudent: [{type: Schema.Types.ObjectId, ref: "Student"}],
-    fromClass: {type: Number, required: true},
-    toClass: {type: Number, required: true},
-});
+const ClassRoomSchema = new Schema({
+    kelas: {type: Number, required: true},
+    rombel: {type: String, required: true},
+    waliKelas: {type: Schema.Types.ObjectId, ref: "User"}
+}, {timestamps: true});
+
+if(mongoose.models.User) {
+    delete mongoose.models.User;
+}
+if(mongoose.models.ClassRoom) {
+    delete mongoose.models.ClassRoom;
+}
 
 export const User = models.User || model("User", UserSchema);
 export const Student = models.Student || model("Student", StudentSchema);
 export const Attendance = models.Attendance || model("Attendance", AttendanceSchema);
-export const PromotionHistory = models.PromotionHistory || model("PromotionHistory", PromotionHistorySchema);
 export const Grade = mongoose.models.Grade || mongoose.model("Grade", NilaiSchema);
+export const ClassRoom = models.ClassRoom || model("ClassRoom", ClassRoomSchema);

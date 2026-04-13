@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import bcrypt from "bcryptjs";
-import { User, Grade } from "./models";
+import { User, Grade, ClassRoom } from "./models";
 import { connectToDatabase } from "./db";
 import { Student } from "./models/Students";
 import { AbsensiSiswa } from "./models/AbsensiSiswa";
@@ -23,8 +23,22 @@ export async function saveTeacher(formData: FormData) {
             name: formData.get("name"),
             email: formData.get("email"),
             status: formData.get("status") || "aktif",
-            profilePicture: formData.get("profilePicture")
+            profilePicture: formData.get("profilePicture"),
+            idGuru: formData.get("idGuru"),
+            nip: formData.get("nip"),
+            nuptk: formData.get("nuptk"),
+            jenisKelamin: formData.get("jenisKelamin"),
+            noTelp: formData.get("noTelp"),
+            pendidikan: formData.get("pendidikan"),
+            statusKepegawaian: formData.get("statusKepegawaian")
         };
+        console.log("=== DATA YANG MASUK KE SERVER ===", data);
+        if(data.idGuru && data.idGuru.trim() !== "") {
+            const existingGuru = await User.findOne({idGuru: data.idGuru});
+            if(existingGuru && existingGuru._id.toString() !== id) {
+                return{error: "Id sudah terpakai, silahkan gunakan id yang lain"};
+            }
+        }
         if(id) {
             const password = formData.get("password") as string;
             if (password) {
@@ -44,6 +58,34 @@ export async function saveTeacher(formData: FormData) {
     }
 }
 
+export async function getWaliKelas(kelas: number, rombel: string) {
+    try {
+        await connectToDatabase();
+        const room = await ClassRoom.findOne({kelas, rombel}).populate("waliKelas", "name _id");
+        return room && room.waliKelas ? JSON.parse(JSON.stringify(room.waliKelas)) : null;
+    } catch(error) {
+        return null;
+    }
+}
+
+export async function setWaliKelas(kelas: number, rombel: string, teacherId: string) {
+    try {
+        await connectToDatabase();
+        if(!teacherId || teacherId === "") {
+            await ClassRoom.findOneAndDelete({kelas, rombel});
+        } else {
+            await ClassRoom.findOneAndUpdate(
+                {kelas, rombel},
+                {waliKelas: teacherId},
+                {upsert: true, new: true}
+            )
+        };
+        revalidatePath("/dashboard/siswa");
+        return {success: true};
+    } catch(error: any) {
+        return{error: error.message};
+    }
+}
 
 export async function saveGrade(formData: FormData) {
     try {
@@ -186,7 +228,7 @@ export async function getStudentByClass(kelas: number) {
     }
 }
 
-export async function getStudentByRombel(kelas: number, rombel: string) {
+export async function getStudentByRombel(kelas: number) {
     try {
         await connectToDatabase();
         const students = await Student.find({kelas: kelas, status: "aktif"}).sort({name: 1});
@@ -272,5 +314,20 @@ export async function deleteStudent(id:string) {
         return {success: true};
     } catch (error: any) {
         return {error: error.message};
+    }
+}
+
+export async function searchStudents(searchQuery: string) {
+    try {
+        await connectToDatabase();
+        const students = await Student.find({
+            $or: [
+                { name: { $regex: searchQuery, $options: "i" } },
+                { nis: { $regex: searchQuery, $options: "i" } }
+            ]
+        }).sort({kelas: 1, rombel: 1, name: 1}).lean();
+        return JSON.parse(JSON.stringify(students))
+    } catch (error) {
+        return[];
     }
 }

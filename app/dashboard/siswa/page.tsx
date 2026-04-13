@@ -2,34 +2,97 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { getStudentsFiltered, addStudents, updateStudents, deleteStudent } from "@/lib/actions";
-import { PlusCircle, Edit, Trash2, X } from "lucide-react";
+import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas } from "@/lib/actions";
+import { PlusCircle, Edit, Trash2, X, Search, UserIcon } from "lucide-react";
 
 export default function SiswaPage() {
     const {data: session} = useSession();
     const [students, setStudents] = useState<any[]>([]);
     const [filterKelas, setFilterKelas] = useState<number>(1);
     const [filterRombel, setFilterRombel] = useState<string>("A");
+    const [searchQuery, setSearchQuaery] = useState<string>("");
     const availableRombels = (filterKelas <= 4) ? ["A", "B", "C"] : ["A", "B"];
     const [showModal, setShowModal] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         nis: "", nisn: "", name: "", gender: "L", kelas: 1, rombel: "A", status: "aktif"
     });
-    const [loading, setLoading] = useState(false);
+    const [waliKelas, setWaliKelasData] = useState<any>(null);
+    const [allTeachers, setAllTeachers] = useState<any[]>([]);
+    const [loadingWali, setLoadingWali] = useState(false);
+    const [loading, setLoading] = useState(true);
     const userRole = session?.user ? (session?.user as any).role : null;
     const isAdmin = userRole === "admin";
 
     useEffect(() => {
-        const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
-        const loadStudents = async () => {
-            setLoading(true);
-            const data = await getStudentsFiltered(filterKelas, normalizedRombel);
-            setStudents(data);
-            setLoading(false);
+        const fetchTeachers = async () => {
+            if(isAdmin) {
+                const teachers = await getTeacher();
+                setAllTeachers(teachers);
+            }
         };
-        loadStudents();
+        fetchTeachers();
+    }, [isAdmin]);
+
+    useEffect(() => {
+        let isMounted = true;
+        const fetchWaliInfo = async () => {
+            setLoadingWali(true);
+            try {
+                const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
+                const wk = await getWaliKelas(filterKelas, normalizedRombel);
+                if(isMounted) {
+                    setWaliKelasData(wk);
+                }
+            } catch (error) {
+                console.error("Gagal memuat wali kelas", error);
+            } finally {
+                if(isMounted) setLoadingWali(false);
+            }
+        };
+        fetchWaliInfo();
+        return () => {isMounted = false;};
     }, [filterKelas, filterRombel]);
+
+    useEffect(() => {
+        let isMounted = true;
+        const loadData = async () => {
+            setLoading(true);
+            try {
+                if(searchQuery.trim() !== "") {
+                    const data = await searchStudents(searchQuery);
+                    if(isMounted) setStudents(data);
+                } else {
+                    const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
+                    const data = await getStudentsFiltered(filterKelas, normalizedRombel);
+                    if(isMounted) setStudents(data);
+                }
+            } catch (error) {
+                console.error("Gagal memuat data siswa", error);
+            } finally {
+                if(isMounted) setLoading(false);
+            }
+        };
+        if(searchQuery.trim() !== "") {
+            const delaySearch = setTimeout(() => {
+                loadData();
+            }, 500);
+            return () => clearTimeout(delaySearch);
+        } else {
+            loadData();
+        }
+        return () => {isMounted = false};
+    }, [filterKelas, filterRombel, searchQuery]);
+
+    const handleWaliKelasChange = async(e: React.ChangeEvent<HTMLSelectElement>) => {
+        const teacherId = e.target.value;
+        setLoadingWali(true);
+        const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
+        await setWaliKelas(filterKelas, normalizedRombel, teacherId);
+        const wk = await getWaliKelas(filterKelas, normalizedRombel);
+        setWaliKelasData(wk);
+        setLoadingWali(false);
+    }
 
     const handleOpenModal = (siswa: any = null) => {
         if(siswa) {
@@ -90,8 +153,39 @@ export default function SiswaPage() {
                     </button>
                 )}
             </div>
+                    <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-blue-600 p-2.5 rounded-lg text-white shadow-sm">
+                                <UserIcon className="w-5 h-5"></UserIcon>
+                            </div>
+                            <div>
+                                <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-0.5">Informasi Kelas</h4>
+                                <p className="text-sm font-semibold text-blue-900">
+                                    Wali Kelas {filterKelas} {filterRombel} : <span className="font-bold text-blue-700 ml-1">{loadingWali ? "Memuat..." : (waliKelas ? waliKelas.name : "Belum Diatur")}</span>
+                                </p>
+                            </div>
+                        </div>
+                        {isAdmin && (
+                            <div className="flex items-center gap-2">
+                                <label htmlFor="wk" className="text-sm font-semibold text-blue-800">Pilih Wali Kelas</label>
+                                <select name="wk" id="wk" title="Pilih wali kelas" value={waliKelas?._id || ""} onChange={handleWaliKelasChange} disabled={loadingWali} className="border border-blue-200 bg-white text-blue-800 p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm disabled:opacity-50 min-w-50">
+                                    <option value="">Kosongkan/Belum ada</option>
+                                    {allTeachers.map(t => (
+                                        <option key={t._id} value={t._id}>{t.name}</option>
+                                    ))}
+                                </select>
+                            </div>
+                        )}
+                    </div>
             <div className="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-xl border border-gray-200 mb-6 shadow-sm">
-                <div className="flex flex-col min-w-[150px]">
+                <div className="flex flex-col min-w-37.5">
+                    <label htmlFor="search" className="block text-sm font-semibold text-gray-700 mb-1"></label>
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"></Search>
+                        <input type="text" id="search" title="search" value={searchQuery} onChange={e => setSearchQuaery(e.target.value)} placeholder="Cari Siswa..." className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none shadow-sm text-gray-700" />
+                    </div>
+                </div>
+                <div className="flex flex-col min-w-37.5">
                     <label htmlFor="filterKelas" className="block text-sm font-semibold text-gray-700 mb-1">
                         Kelas
                     </label>
@@ -108,13 +202,15 @@ export default function SiswaPage() {
             </div>
             <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
                 {loading ? <div className="p-10 text-center">Memuat data...</div> : (
-                    <table className="w-full text-left text-sm text-gray-600 min-w-[800px]">
+                    <table className="w-full text-left text-sm text-gray-600 min-w-200 whitespace-nowrap">
                         <thead className="bg-gray-50 border-b border-gray-200 text-gray-700 uppercase font-semibold">
                             <tr>
                                 <th className="px-6 py-4 w-16">No</th>
                                 <th className="px-6 py-4">NIS</th>
                                 <th className="px-6 py-4">NISN</th>
                                 <th className="px-6 py-4">Nama Siswa</th>
+                                <th className="px-6 py-4 text-center">Kelas</th>
+                                <th className="px-6 py-4 text-center">Rombel</th>
                                 <th className="px-6 py-4 text-center">Ket (L/P)</th>
                                 <th className="px-6 py-4">Status</th>
                                 {isAdmin && <th className="px-6 py-4 text-center">Aksi</th>}
@@ -126,9 +222,11 @@ export default function SiswaPage() {
                             ) : students.map((siswa, index) => (
                                 <tr key={siswa._id} className="border-b border-gray-100 hover:bg-gray-50">
                                     <td className="px-6 py-4">{index + 1}</td>
-                                    <td className="px-6 py-4">{siswa.nis}</td>
-                                    <td className="px-6 py-4">{siswa.nisn || "-"}</td>
+                                    <td className="px-6 py-4 tabular-nums">{siswa.nis}</td>
+                                    <td className="px-6 py-4 tabular-nums">{siswa.nisn || "-"}</td>
                                     <td className="px-6 py-4 font-medium text-gray-900">{siswa.name}</td>
+                                    <td className="px-6 py-4 text-center font-bold text-blue-600">{siswa.kelas}</td>
+                                    <td className="px-6 py-4 text-center font-bold text-blue-600">{siswa.rombel}</td>
                                     <td className="px-6 py-4 text-center font-semibold">{siswa.gender}</td>
                                     <td className="px-6 py-4">
                                         <span className={`px-2 py-1 text-xs rounded-full ${siswa.status === 'aktif' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}`}>
