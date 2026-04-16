@@ -2,6 +2,7 @@ import mongoose, {Schema, model, models} from "mongoose";
 const UserSchema = new Schema({
     name: {type: String, required: true},
     email: {type: String, required: true, unique: true},
+    gmail: {type: String, required: true, unique: true},
     password: {type: String, required: true},
     role: {type: String, enum: ["admin", "guru"], default: "guru"},
     profilePicture: {type: String, default: ""},
@@ -13,6 +14,17 @@ const UserSchema = new Schema({
     pendidikan: { type: String, default: "" },
     statusKepegawaian: { type: String, default: "" },
     status: {type: String, enum: ["aktif", "nonaktif"], default: "aktif"},
+    tempatLahir: {type: String, default: ""},
+    tanggalLahir: { type: String, default: "" },
+    tmtMengajar: { type: String, default: "" },
+    mataPelajaran: { type: String, default: "" },
+    jabatanStruktural: { type: String, default: "Guru Kelas" },
+    jabatanFungsional: { type: String, default: "Guru Pertama"},
+    alamatLengkap: { type: String, default: "" },
+    desa: { type: String, default: "" },
+    kecamatan: { type: String, default: "" },
+    kabupaten: { type: String, default: "" },
+    provinsi: { type: String, default: "" },
 }, {timestamps: true, strict: false});
 
 const StudentSchema = new Schema({

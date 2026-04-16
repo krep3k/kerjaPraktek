@@ -49,31 +49,11 @@ export default function AbsensiPage() {
         setLoading(false);
     };
 
-    const downloadCSV = () => {
-        const headers = ["NO", "NIS", "NAMA", "STATUS", "KETERANGAN"];
-        const rows = students.map((s, i) => {
-            const status = absensiData[s._id]?.status || "Hadir";
-            const ket = absensiData[s._id]?.keterangan || "";
-            return `${i + 1},${s.nis},"${s.name}",${status},"${ket}"`;
-        });
-        const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `Absensi_Kelas_${kelas}${rombel}_${tanggal}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
-
     return (
         <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex justify-between items-center border-b pb-4">
-                <h1 className="text-2xl font-bold text-gray-800">Record Absensi Siswa</h1>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Record Absensi Siswa</h1>
                 <div className="flex gap-3">
-                    <button title="download" onClick={downloadCSV} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
-                        <Download className="w-5 h-5"></Download>
-                    </button>
                     <button title="save" onClick={handleSave} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                         <Save className="w-5 h-5">Simpan</Save>
                     </button>

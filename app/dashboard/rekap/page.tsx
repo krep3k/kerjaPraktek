@@ -112,13 +112,11 @@ export default function RekapDataPage() {
 
     return (
         <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
-            <div className="flex justify-between items-center border-b pb-4">
-                <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <FileText className="w-6 h-6 text-blue-600">
-                        Recap laporan siswa
-                    </FileText>Recap laporan siswa
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
+                    Recap laporan siswa
                 </h1>
-                <button title="download" onClick={downloadCSV} className="flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
+                <button title="download" onClick={downloadCSV} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm active:scale-95 text-sm">
                     <Download className="w-5 h-5"></Download>Download SpreadSheet (CSV)
                 </button>
             </div>

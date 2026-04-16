@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { getStudentByClass, getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/lib/actions";
-import { Save, CheckCircle2 } from "lucide-react";
+import { getMataPelajaranByKelas } from "@/lib/constants";
+import { Save } from "lucide-react";
 
 export default function RekapNilaiPage() {
     const [kelas, setKelas] = useState<number>(1);
@@ -15,8 +16,8 @@ export default function RekapNilaiPage() {
     const [students, setStudents] = useState<any[]>([]);
     const [nilaiData, setNilaiData] = useState<any>({});
     const [loading, setLoading] = useState(false);
-    const [showSuccess, setShowSuccess] = useState(false);
-    const daftarMapel = ["Matematika", "Bahasa Indonesia", "Bahasa Inggris", "Ilmu Pengetahuan Alam (IPA)", "Ilmu Pengetahuan Sosisal (IPS)", "Pendidikan Agama", "Pendidikan Pancasila dan Kewarganegaraan (PPKn)", "Seni Budaya", "Pendidikan Jasmani, Olahraga, dan Kesehatan (PJOK)"];
+
+    const mapelOption = getMataPelajaranByKelas(kelas).semuaMapel;
     
     useEffect(() => {
         const loadData = async () => {
@@ -32,6 +33,15 @@ export default function RekapNilaiPage() {
         };
         loadData();
     }, [kelas, rombel, semester, mapel, jenisNilai, tanggal]);
+
+    const handleKelasChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const kelasBaru = Number(e.target.value);
+        setKelas(kelasBaru);
+        const daftarMapelBaru = getMataPelajaranByKelas(kelasBaru).semuaMapel;
+        if(!daftarMapelBaru.includes(mapel)){
+            setMapel(daftarMapelBaru[0] || "");
+        }
+    };
 
     const handleSave = async () => {
         setLoading(true);
@@ -58,7 +68,7 @@ export default function RekapNilaiPage() {
             <div className="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-xl border mb-6">
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Kelas
                     <label htmlFor="">
-                        <select title="kelas" name="" id="" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                        <select title="kelas" name="" id="" value={kelas} onChange={handleKelasChange} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                             {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
                         </select>
                     </label>
@@ -79,10 +89,10 @@ export default function RekapNilaiPage() {
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Mata Pelajaran
-                    <select title="mapel" name="" id="" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
-                        <option value="Matematika">Matematika</option>
-                        <option value="Bahasa Indonesia">Bahasa Indonesia</option>
-                        <option value="IPA">IPA</option>
+                    <select title="mapel" name="mapel" id="mapel" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                        {mapelOption.map(m => (
+                            <option value={m} key={m}>{m}</option>
+                        ))}
                     </select>
                 </div>
                 <div>

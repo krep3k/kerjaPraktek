@@ -22,6 +22,7 @@ export async function saveTeacher(formData: FormData) {
         const data: any = {
             name: formData.get("name"),
             email: formData.get("email"),
+            gmail: formData.get("gmail"),
             status: formData.get("status") || "aktif",
             profilePicture: formData.get("profilePicture"),
             idGuru: formData.get("idGuru"),
@@ -30,7 +31,18 @@ export async function saveTeacher(formData: FormData) {
             jenisKelamin: formData.get("jenisKelamin"),
             noTelp: formData.get("noTelp"),
             pendidikan: formData.get("pendidikan"),
-            statusKepegawaian: formData.get("statusKepegawaian")
+            statusKepegawaian: formData.get("statusKepegawaian"),
+            tempatLahir: formData.get("tempatLahir"),
+            tanggalLahir: formData.get("tanggalLahir"),
+            tmtMengajar: formData.get("tmtMengajar"),
+            mataPelajaran: formData.get("mataPelajaran"),
+            jabatanStruktural: formData.get("jabatanStruktural"),
+            jabatanFungsional: formData.get("jabatanFungsional"),
+            alamatLengkap: formData.get("alamatLengkap"),
+            desa: formData.get("desa"),
+            kecamatan: formData.get("kecamatan"),
+            kabupaten: formData.get("kabupaten"),
+            provinsi: formData.get("provinsi"),
         };
         console.log("=== DATA YANG MASUK KE SERVER ===", data);
         if(data.idGuru && data.idGuru.trim() !== "") {
@@ -64,6 +76,7 @@ export async function getWaliKelas(kelas: number, rombel: string) {
         const room = await ClassRoom.findOne({kelas, rombel}).populate("waliKelas", "name _id");
         return room && room.waliKelas ? JSON.parse(JSON.stringify(room.waliKelas)) : null;
     } catch(error) {
+        console.error(error);
         return null;
     }
 }
@@ -328,6 +341,7 @@ export async function searchStudents(searchQuery: string) {
         }).sort({kelas: 1, rombel: 1, name: 1}).lean();
         return JSON.parse(JSON.stringify(students))
     } catch (error) {
+        console.error(error);
         return[];
     }
 }

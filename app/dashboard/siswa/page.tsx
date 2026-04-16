@@ -140,6 +140,10 @@ export default function SiswaPage() {
         }
     }
 
+    const totalL = students.filter((s: any) => s.gender === "L").length;
+    const totalP = students.filter((s: any) => s.gender === "P").length;
+    const totalSiswa = students.length;
+
     return (
         <div className="space-y-6 max-w-6xl mx-auto">
             <div className="flex justify-between items-center">
@@ -152,7 +156,7 @@ export default function SiswaPage() {
                         <PlusCircle className="w-5 h-5">Tambah Siswa</PlusCircle>
                     </button>
                 )}
-            </div>
+                </div>
                     <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
                             <div className="bg-blue-600 p-2.5 rounded-lg text-white shadow-sm">
@@ -163,6 +167,11 @@ export default function SiswaPage() {
                                 <p className="text-sm font-semibold text-blue-900">
                                     Wali Kelas {filterKelas} {filterRombel} : <span className="font-bold text-blue-700 ml-1">{loadingWali ? "Memuat..." : (waliKelas ? waliKelas.name : "Belum Diatur")}</span>
                                 </p>
+                                <div className="flex flex-wrap gap-2">
+                                    <span className="bg-white text-blue-800 text-[11px] px-2.5 py-1 rounded-md font-bold border border-blue-200 shadow-sm">Total: {totalSiswa} Siswa</span>
+                                    <span className="bg-emerald-50 text-emerald-700 text-[11px] px-2.5 py-1 rounded-md font-bold border border-emerald-200">Laki-laki: {totalL}</span>
+                                    <span className="bg-rose-50 text-rose-700 text-[11px] px-2.5 py-1 rounded-md font-bold border border-rose-200">Perempuan: {totalP}</span>
+                                </div>
                             </div>
                         </div>
                         {isAdmin && (
@@ -170,7 +179,7 @@ export default function SiswaPage() {
                                 <label htmlFor="wk" className="text-sm font-semibold text-blue-800">Pilih Wali Kelas</label>
                                 <select name="wk" id="wk" title="Pilih wali kelas" value={waliKelas?._id || ""} onChange={handleWaliKelasChange} disabled={loadingWali} className="border border-blue-200 bg-white text-blue-800 p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm disabled:opacity-50 min-w-50">
                                     <option value="">Kosongkan/Belum ada</option>
-                                    {allTeachers.map(t => (
+                                    {allTeachers.filter(t => t.jabatanStruktural === "Guru Kelas").map(t => (
                                         <option key={t._id} value={t._id}>{t.name}</option>
                                     ))}
                                 </select>

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { Users, UserCheck, BookOpen, GraduationCap } from "lucide-react";
+import { Users, UserCheck, GraduationCap } from "lucide-react";
 import { getDashboardStats } from "@/lib/actions";
 
 export default async function DashboardPage() {
