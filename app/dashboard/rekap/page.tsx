@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getStudentsFiltered, getAbsensiRecord, getGNilaiRecord } from "@/lib/actions";
-import { Download, FileText, CheckSquare, BookOpen } from "lucide-react";
+import { Download, CheckSquare, BookOpen } from "lucide-react";
 
 interface Student {
     _id: string;
