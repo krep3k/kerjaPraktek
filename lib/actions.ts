@@ -28,6 +28,7 @@ export async function saveTeacher(formData: FormData) {
             idGuru: formData.get("idGuru"),
             nip: formData.get("nip"),
             nuptk: formData.get("nuptk"),
+            golongan: formData.get("golongan"),
             jenisKelamin: formData.get("jenisKelamin"),
             noTelp: formData.get("noTelp"),
             pendidikan: formData.get("pendidikan"),

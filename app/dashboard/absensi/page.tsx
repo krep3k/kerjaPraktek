@@ -3,7 +3,9 @@
 
 import { useEffect, useState } from "react";
 import { getAbsensiRecord, saveBulkAbsensi, getStudentsFiltered } from "@/lib/actions";
-import { Save, Download } from "lucide-react";
+import { Save } from "lucide-react";
+import { getRombelByKelas } from "@/lib/constants";
+import { getMataPelajaranByKelas } from "@/lib/constants";
 
 export default function AbsensiPage() {
     const [kelas, setKelas] = useState<number>(1);
@@ -13,6 +15,8 @@ export default function AbsensiPage() {
     const [students, setStudents] = useState<any[]>([]);
     const [absensiData, setAbsensiData] = useState<any>({});
     const [loading, setLoading] = useState(false);
+    const [mapel, setMapel] = useState("Matematika");
+    const rombelOption = getRombelByKelas(kelas);
 
     useEffect(() => {
         const loadData = async () => {
@@ -32,6 +36,19 @@ export default function AbsensiPage() {
     const handleAbsenChange = (id: string, field: string, value: string) => {
         setAbsensiData({...absensiData, [id]: {...absensiData[id], [field]: value}});
     }
+
+    const handleKelasChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const kelasBaru = Number(e.target.value);
+        setKelas(kelasBaru);
+        const daftarMapelBaru = getMataPelajaranByKelas(kelasBaru).semuaMapel;
+        if(!daftarMapelBaru.includes(mapel)) {
+            setMapel(daftarMapelBaru[0] || "");
+        }
+        const daftarRombelBaru = getRombelByKelas(kelasBaru);
+        if(!daftarMapelBaru.includes(rombel)) {
+            setRombel(daftarRombelBaru[0] || "");
+        }
+    };
 
     const handleSave = async () => {
         setLoading(true);
@@ -61,13 +78,13 @@ export default function AbsensiPage() {
             </div>
             <div className="flex gap-4">
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Kelas
-                    <select name="" id="" value={kelas} onChange={e => setKelas(Number(e.target.value))} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                    <select name="" id="" value={kelas} onChange={handleKelasChange} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                         {[1, 2, 3, 4, 5, 6].map(k => <option key={k} value={k}>{k}</option>)}
                     </select>
                 </label></div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Rombel
                     <select name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
-                        {["A", "B", "C"].map(r => <option key={r} value={r}>{r}</option>)}
+                        {rombelOption.map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                 </label></div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal

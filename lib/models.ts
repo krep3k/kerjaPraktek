@@ -13,6 +13,7 @@ const UserSchema = new Schema({
     noTelp: { type: String, default: "" },
     pendidikan: { type: String, default: "" },
     statusKepegawaian: { type: String, default: "" },
+    golongan: { type: String, default: "" },
     status: {type: String, enum: ["aktif", "nonaktif"], default: "aktif"},
     tempatLahir: {type: String, default: ""},
     tanggalLahir: { type: String, default: "" },

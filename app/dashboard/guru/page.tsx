@@ -187,6 +187,8 @@ export default function DataGuruPage() {
                                                     <div className="grid grid-cols-3 gap-2">
                                                         <span className="text-slate-500">Status Pegawai</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md">{viewingTeacher.statusKepegawaian || "-"}</span></span>
+                                                        <span className="text-slate-500">Golongan/Ruang</span>
+                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.golongan || "-"}</span>
                                                         <span className="text-slate-500">Jabatan Struktural</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.jabatanStruktural || "-"}</span>
                                                         <span className="text-slate-500">Jabatan Fungsional</span>
@@ -324,9 +326,18 @@ export default function DataGuruPage() {
                                             </select>
                                         </div>
                                         <div>
+                                            <label htmlFor="golongan" className="block text-xs font-bold text-slate-500 uppercase mb-1">Golongan/Ruang</label>
+                                            <select name="golongan" id="golongan" defaultValue={selectedTeacher?.golongan || ""} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border cursor-pointer">
+                                                <option value="">-- Non PNS / Kosong --</option>
+                                                {["I/a", "I/b", "I/c", "I/d", "II/a", "II/b", "II/c", "II/d", "III/a", "III/b", "III/c", "III/d", "IV/a", "IV/b", "IV/c", "IV/d", "IV/e"].map(gol => (
+                                                    <option value={gol} key={gol}>{gol}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div>
                                             <label htmlFor="jabatanStruktural" className="block text-xs font-bold text-slate-500 uppercase mb-1">Jabatan Struktural</label>
                                             <select name="jabatanStruktural" id="jabatanStruktural" defaultValue={selectedTeacher?.jabatanStruktural || "Guru Kelas"} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border">
-                                                {["Guru Kelas", "Guru Mapel", "Wali Kelas", "Kepala Sekolah", "Wakil Kepala Sekolah", "Staff"].map(s => <option key={s} value={s}>{s}</option>)}
+                                                {["Guru Kelas", "Guru Mapel", "Kepala Sekolah", "Wakil Kepala Sekolah", "Staff"].map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                         </div>
                                         <div>

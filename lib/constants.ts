@@ -20,3 +20,10 @@ export function getMataPelajaranByKelas(kelas: number){
         semuaMapel: [...mapelGuruKelas, ...MAPEL_BIDANG_STUDI]
     };
 }
+
+export function getRombelByKelas(kelas: number) {
+    if(kelas >= 5) {
+        return ["A", "B"];
+    }
+    return ["A", "B", "C"];
+}

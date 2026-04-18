@@ -2,9 +2,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getStudentByClass, getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/lib/actions";
+import { getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/lib/actions";
 import { getMataPelajaranByKelas } from "@/lib/constants";
 import { Save } from "lucide-react";
+import { getRombelByKelas } from "@/lib/constants";
 
 export default function RekapNilaiPage() {
     const [kelas, setKelas] = useState<number>(1);
@@ -18,6 +19,7 @@ export default function RekapNilaiPage() {
     const [loading, setLoading] = useState(false);
 
     const mapelOption = getMataPelajaranByKelas(kelas).semuaMapel;
+    const rombelOption = getRombelByKelas(kelas);
     
     useEffect(() => {
         const loadData = async () => {
@@ -38,8 +40,12 @@ export default function RekapNilaiPage() {
         const kelasBaru = Number(e.target.value);
         setKelas(kelasBaru);
         const daftarMapelBaru = getMataPelajaranByKelas(kelasBaru).semuaMapel;
-        if(!daftarMapelBaru.includes(mapel)){
+        if(!daftarMapelBaru.includes(mapel)) {
             setMapel(daftarMapelBaru[0] || "");
+        }
+        const daftarRombelBaru = getRombelByKelas(kelasBaru);
+        if(!daftarMapelBaru.includes(rombel)) {
+            setRombel(daftarRombelBaru[0] || "");
         }
     };
 
@@ -76,7 +82,7 @@ export default function RekapNilaiPage() {
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Rombel
                     <label htmlFor="">
                         <select title="rombel" name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
-                            {["A","B","C"].map(r => <option key={r} value={r}>{r}</option>)}
+                            {rombelOption.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                     </label>
                 </div>
