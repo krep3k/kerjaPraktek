@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { authOptions } from "@/components/lib/auth";
 import { Users, UserCheck, GraduationCap } from "lucide-react";
-import { getDashboardStats } from "@/lib/actions";
+import { getDashboardStats } from "@/components/lib/actions";
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);

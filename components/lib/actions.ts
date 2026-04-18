@@ -19,6 +19,7 @@ export async function saveTeacher(formData: FormData) {
     try {
         await connectToDatabase();
         const id = formData.get("id") as string;
+        const jabatanBaru = formData.get("jabatan") as string;
         const data: any = {
             name: formData.get("name"),
             email: formData.get("email"),
@@ -37,6 +38,7 @@ export async function saveTeacher(formData: FormData) {
             tanggalLahir: formData.get("tanggalLahir"),
             tmtMengajar: formData.get("tmtMengajar"),
             mataPelajaran: formData.get("mataPelajaran"),
+            jabatan: jabatanBaru,
             jabatanStruktural: formData.get("jabatanStruktural"),
             jabatanFungsional: formData.get("jabatanFungsional"),
             alamatLengkap: formData.get("alamatLengkap"),
@@ -58,6 +60,12 @@ export async function saveTeacher(formData: FormData) {
                 data.password = await bcrypt.hash(password, 10);
             }
             await User.findByIdAndUpdate(id, data);
+            if(jabatanBaru !== "Guru Kelas"){
+                await ClassRoom.updateMany(
+                    {waliKelas: id},
+                    {$set: {waliKelas: null}},
+                );
+            }
         } else {
             const password = formData.get("password") as string;
             data.password = await bcrypt.hash(password, 10);
@@ -65,6 +73,8 @@ export async function saveTeacher(formData: FormData) {
             await User.create(data);
         }
         revalidatePath("/dashboard/guru");
+        revalidatePath("/dashboard/absensi-guru");
+        revalidatePath("/dashboard/siswa");
         return {success: true};
     } catch (error: any) {
         return {error: error.message};
@@ -345,4 +355,49 @@ export async function searchStudents(searchQuery: string) {
         console.error(error);
         return[];
     }
+}
+
+export async function getTeacherWithClass() {
+    await connectToDatabase();
+    const teachers = await User.find({role: "guru", status: "aktif"}).lean();
+    const rooms = await ClassRoom.find().lean();
+    return teachers.map((t: any) => {
+        const assignedClass = rooms.find((r: any) => r.waliKelas?.toString() === t._id.toString());
+        let jabatanLengkap = t.jabatan || "Guru";
+        if(t.jabatan === "Guru Kelas" || t.jabatan === "Wali Kelas") {
+            if(assignedClass){
+                jabatanLengkap = `Guru Kelas ${assignedClass.kelas}${assignedClass.rombel}`;
+            } else {
+                jabatanLengkap = "Guru Kelas (belum diatur)";
+            }
+        }
+        else if(t.jabatan === "Guru Mapel" && t.mataPelajaran) {
+            jabatanLengkap = `Guru ${t.mataPelajaran}`
+        }
+        return {...t, _id: t._id.toString(), jabatanLengkap};
+    });
+}
+
+export async function saveTeacherAttendance(attendanceData: any[], date: string) {
+    await connectToDatabase();
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    for(const item of attendanceData) {
+        await Attendance.findOneAndUpdate(
+            {userId: item.userId, date: targetDate},
+            {status: item.status, notes: item.notes},
+            {upsert: true},
+        );
+    }
+    return{success: true};
+}
+
+export async function getTeacherAttendanceRecap(startDate: string, endDate: string) {
+    await connectToDatabase();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    return await Attendance.find({
+        date: {$gte: start, $lte: end}
+    }).populate("userId", "name idGuru jabatan").lean();
 }

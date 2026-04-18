@@ -2,10 +2,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/lib/actions";
-import { getMataPelajaranByKelas } from "@/lib/constants";
+import { getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/components/lib/actions";
+import { getMataPelajaranByKelas } from "@/components/lib/constants";
 import { Save } from "lucide-react";
-import { getRombelByKelas } from "@/lib/constants";
+import { getRombelByKelas } from "@/components/lib/constants";
 
 export default function RekapNilaiPage() {
     const [kelas, setKelas] = useState<number>(1);

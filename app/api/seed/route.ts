@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { connectToDatabase } from "@/lib/db";
-import { User } from "@/lib/models";
+import { connectToDatabase } from "@/components/lib/db";
+import { User } from "@/components/lib/models";
 
 export async function GET() {
     try {

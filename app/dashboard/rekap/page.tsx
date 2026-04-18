@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getStudentsFiltered, getAbsensiRecord, getGNilaiRecord } from "@/lib/actions";
+import { getStudentsFiltered, getAbsensiRecord, getGNilaiRecord } from "@/components/lib/actions";
 import { Download, CheckSquare, BookOpen } from "lucide-react";
-import { getMataPelajaranByKelas, getRombelByKelas } from "@/lib/constants";
+import { getMataPelajaranByKelas, getRombelByKelas } from "@/components/lib/constants";
 
 interface Student {
     _id: string;

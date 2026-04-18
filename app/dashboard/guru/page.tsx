@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
-import { getTeacher, saveTeacher, deleteTeacher } from "@/lib/actions";
+import { getTeacher, saveTeacher, deleteTeacher } from "@/components/lib/actions";
 import { User as UserIcon, Pencil, Trash2, X, PlusCircle, Eye } from "lucide-react";
 
 interface Teacher {
@@ -336,7 +336,11 @@ export default function DataGuruPage() {
                                         </div>
                                         <div>
                                             <label htmlFor="jabatanStruktural" className="block text-xs font-bold text-slate-500 uppercase mb-1">Jabatan Struktural</label>
-                                            <select name="jabatanStruktural" id="jabatanStruktural" defaultValue={selectedTeacher?.jabatanStruktural || "Guru Kelas"} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border">
+                                            <select name="jabatanStruktural" id="jabatanStruktural" defaultValue={selectedTeacher?.jabatanStruktural || "Guru Kelas"} onChange={(e) => {
+                                                if(e.target.value !== "Guru Mapel") {
+                                                    const mapelDropdown = document.getElementById("mataelajaran") as HTMLSelectElement;
+                                                    if(mapelDropdown) mapelDropdown.value = "";
+                                                }}} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border">
                                                 {["Guru Kelas", "Guru Mapel", "Kepala Sekolah", "Wakil Kepala Sekolah", "Staff"].map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                         </div>

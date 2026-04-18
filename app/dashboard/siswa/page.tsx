@@ -2,7 +2,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas } from "@/lib/actions";
+import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas } from "@/components/lib/actions";
 import { PlusCircle, Edit, Trash2, X, Search, UserIcon } from "lucide-react";
 
 export default function SiswaPage() {

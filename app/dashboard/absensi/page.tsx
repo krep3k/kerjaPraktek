@@ -2,10 +2,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getAbsensiRecord, saveBulkAbsensi, getStudentsFiltered } from "@/lib/actions";
+import { getAbsensiRecord, saveBulkAbsensi, getStudentsFiltered } from "@/components/lib/actions";
 import { Save } from "lucide-react";
-import { getRombelByKelas } from "@/lib/constants";
-import { getMataPelajaranByKelas } from "@/lib/constants";
+import { getRombelByKelas } from "@/components/lib/constants";
+import { getMataPelajaranByKelas } from "@/components/lib/constants";
 
 export default function AbsensiPage() {
     const [kelas, setKelas] = useState<number>(1);
