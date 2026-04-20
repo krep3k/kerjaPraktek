@@ -21,6 +21,8 @@ const UserSchema = new Schema({
     mataPelajaran: { type: String, default: "" },
     jabatanStruktural: { type: String, default: "Guru Kelas" },
     jabatanFungsional: { type: String, default: "Guru Pertama"},
+    kelas: { type: Number, default: null},
+    rombel: { type: String, default: ""},
     alamatLengkap: { type: String, default: "" },
     desa: { type: String, default: "" },
     kecamatan: { type: String, default: "" },

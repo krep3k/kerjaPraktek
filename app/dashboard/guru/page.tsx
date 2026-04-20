@@ -191,10 +191,20 @@ export default function DataGuruPage() {
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.golongan || "-"}</span>
                                                         <span className="text-slate-500">Jabatan Struktural</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.jabatanStruktural || "-"}</span>
+                                                        {viewingTeacher.jabatanStruktural === "Guru Kelas" && (
+                                                            <>
+                                                                <span className="text-slate-500">Mengampu kelas</span>
+                                                                <span className="col-span-2 font-semibold text-blue-600">: {viewingTeacher.kelas} {viewingTeacher.rombel}</span>
+                                                            </>
+                                                        )}
+                                                        {viewingTeacher.jabatanStruktural === "Guru Mapel" && (
+                                                            <>
+                                                                <span className="text-slate-500">Mata Pelajaran</span>
+                                                                <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.mataPelajaran || "-"}</span>
+                                                            </>
+                                                        )}
                                                         <span className="text-slate-500">Jabatan Fungsional</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.jabatanFungsional || "-"}</span>
-                                                        <span className="text-slate-500">Mata Pelajaran</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.mataPelajaran || "-"}</span>
                                                         <span className="text-slate-500">TMT Mengajar</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.tmtMengajar || "-"}</span>
                                                         <span className="text-slate-500">NUPTK</span>
@@ -338,8 +348,14 @@ export default function DataGuruPage() {
                                             <label htmlFor="jabatanStruktural" className="block text-xs font-bold text-slate-500 uppercase mb-1">Jabatan Struktural</label>
                                             <select name="jabatanStruktural" id="jabatanStruktural" defaultValue={selectedTeacher?.jabatanStruktural || "Guru Kelas"} onChange={(e) => {
                                                 if(e.target.value !== "Guru Mapel") {
-                                                    const mapelDropdown = document.getElementById("mataelajaran") as HTMLSelectElement;
+                                                    const mapelDropdown = document.getElementById("mataPelajaran") as HTMLSelectElement;
                                                     if(mapelDropdown) mapelDropdown.value = "";
+                                                }
+                                                if(e.target.value !== "Guru Kelas") {
+                                                    const kls = document.getElementsByName("kelas")[0] as HTMLSelectElement;
+                                                    const rmb = document.getElementsByName("rombel")[0] as HTMLSelectElement;
+                                                    if(kls) kls.value = "";
+                                                    if(rmb) rmb.value = "";
                                                 }}} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border">
                                                 {["Guru Kelas", "Guru Mapel", "Kepala Sekolah", "Wakil Kepala Sekolah", "Staff"].map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
@@ -358,6 +374,22 @@ export default function DataGuruPage() {
                                                 <option value="PJOK">PJOK</option>
                                                 <option value="Lainnya">Lainnya / Ekstrakurikuler</option>
                                             </select>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-3 mt-3">
+                                            <div>
+                                                <label htmlFor="kelas" className="block text-xs font-bold text-slate-500 uppercase mb-1">Kelas yang diampu</label>
+                                                <select name="kelas" id="kelas" defaultValue={selectedTeacher?.kelas || ""} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border cursor-pointer bg-white">
+                                                    <option value="">--Pilih Kelas--</option>
+                                                    {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label htmlFor="rombel" className="block text-xs font-bold text-slate-500 uppercase mb-1">Rombel</label>
+                                                <select name="rombel" id="rombel" defaultValue={selectedTeacher?.rombel || ""} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border cursor-pointer bg-white">
+                                                    <option value="">--Pilih Rombel--</option>
+                                                    {["A", "B", "C"].map(r => <option key={r} value={r}>Rombel {r}</option>)}
+                                                </select>
+                                            </div>
                                         </div>
                                         <div>
                                             <label htmlFor="tmtMengajar" className="block text-xs font-bold text-slate-500 uppercase mb-1">TMT Mengajar</label>

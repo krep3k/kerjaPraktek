@@ -41,6 +41,8 @@ export async function saveTeacher(formData: FormData) {
             jabatan: jabatanBaru,
             jabatanStruktural: formData.get("jabatanStruktural"),
             jabatanFungsional: formData.get("jabatanFungsional"),
+            kelas: formData.get("kelas") ? Number(formData.get("kelas")) : null,
+            rombel: formData.get("rombel") || "",
             alamatLengkap: formData.get("alamatLengkap"),
             desa: formData.get("desa"),
             kecamatan: formData.get("kecamatan"),
@@ -393,11 +395,39 @@ export async function saveTeacherAttendance(attendanceData: any[], date: string)
 }
 
 export async function getTeacherAttendanceRecap(startDate: string, endDate: string) {
-    await connectToDatabase();
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-    return await Attendance.find({
-        date: {$gte: start, $lte: end}
-    }).populate("userId", "name idGuru jabatan").lean();
+    try {
+        await connectToDatabase();
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        start.setDate(start.getDate() - 1);
+        end.setDate(end.getDate() + 2);
+        const rawData = await Attendance.find({
+            date: {$gte: start, $lte: end}
+        }).populate("userId", "name jabatanStruktural idGuru").sort({date: -1});
+        const filteredData = rawData.filter((item: any) => {
+            if(!item.date) return false;
+            const itemDateStr = new Date(item.date).toISOString().split("T")[0];
+            return itemDateStr >= startDate && itemDateStr <= endDate;
+        });
+        return JSON.parse(JSON.stringify(filteredData));
+    } catch (error) {
+        console.error("gagal mengambil rekap absensi guru:", error);
+        return[];
+    }
+}
+
+export async function getAvailableAttendanceDates() {
+    try {
+        await connectToDatabase();
+        const dates: (string | null)[] = await Attendance.distinct("date");
+        const validDates = dates.filter((d): d is string => d != null).map((d) => {
+            const dateObj = new Date(d);
+            return isNaN(dateObj.getTime()) ? null : dateObj.toISOString().split("T")[0];
+        }).filter((d): d is string => d != null);
+        const uniqueDates = Array.from(new Set(validDates));
+        return uniqueDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    } catch (error) {
+        console.error("Gagal mengambil tanggal absensi:", error);
+        return [];
+    }
 }
