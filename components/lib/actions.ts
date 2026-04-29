@@ -8,10 +8,12 @@ import { AbsensiSiswa } from "./models/AbsensiSiswa";
 import { revalidatePath } from "next/cache";
 import { Attendance } from "./models";
 import { NilaiSiswa } from "./models/NilaiSiswa";
+import { GudangData } from "./models";
+import { decrypt } from "./encryption";
 
 export async function getTeacher() {
     await connectToDatabase();
-    const teacher = await User.find({role: "guru"}).sort({ name: 1 }).lean();
+    const teacher = await User.find({role: {$ne: "admin"}}).sort({ name: 1 }).lean();
     return JSON.parse(JSON.stringify(teacher));
 }
 
@@ -23,10 +25,10 @@ export async function saveTeacher(formData: FormData) {
         const data: any = {
             name: formData.get("name"),
             email: formData.get("email"),
-            gmail: formData.get("gmail"),
             status: formData.get("status") || "aktif",
             profilePicture: formData.get("profilePicture"),
             idGuru: formData.get("idGuru"),
+            role: formData.get("role"),
             nip: formData.get("nip"),
             nuptk: formData.get("nuptk"),
             golongan: formData.get("golongan"),
@@ -71,7 +73,6 @@ export async function saveTeacher(formData: FormData) {
         } else {
             const password = formData.get("password") as string;
             data.password = await bcrypt.hash(password, 10);
-            data.role = "guru";
             await User.create(data);
         }
         revalidatePath("/dashboard/guru");
@@ -430,4 +431,25 @@ export async function getAvailableAttendanceDates() {
         console.error("Gagal mengambil tanggal absensi:", error);
         return [];
     }
+}
+
+export async function simpanDataGudang(data: {namaFile: string, urlFile: string, typeFile: string, ukuranFile: number, pemilikId: string}) {
+    await connectToDatabase();
+    await GudangData.create(data);
+    revalidatePath("/dashboard/gudang");
+}
+
+export async function getGudangDataGuru(pemilikId: string) {
+    await connectToDatabase();
+    const rawFiles = await GudangData.find({pemilikId}).sort({createdAt: -1}).lean();
+    const files = rawFiles.map((file: any) => ({
+        ...file, urlFile: decrypt(file.urlFile)
+    }));
+    return JSON.parse(JSON.stringify(files));
+}
+
+export async function deleteDataGudang(id: string) {
+    await connectToDatabase();
+    await GudangData.findByIdAndDelete(id);
+    revalidatePath("/dashboard/gudang");
 }

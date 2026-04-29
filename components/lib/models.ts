@@ -1,14 +1,15 @@
 import mongoose, {Schema, model, models} from "mongoose";
+import { encrypt, decrypt } from "./encryption";
+
 const UserSchema = new Schema({
     name: {type: String, required: true},
     email: {type: String, required: true, unique: true},
-    gmail: {type: String, required: true, unique: true},
     password: {type: String, required: true},
-    role: {type: String, enum: ["admin", "guru"], default: "guru"},
+    role: {type: String, enum: ["admin", "guru", "kepsek", "tu"], default: "guru"},
     profilePicture: {type: String, default: ""},
     idGuru: { type: String, default: "" },
-    nip: { type: String, default: "" },
-    nuptk: { type: String, default: "" },
+    nip: { type: String, default: "", unique: true, set: encrypt, get: decrypt },
+    nuptk: { type: String, default: "", unique: true, set: encrypt, get: decrypt },
     jenisKelamin: { type: String, enum: ["Laki-laki", "Perempuan"], default: "Laki-laki" },
     noTelp: { type: String, default: "" },
     pendidikan: { type: String, default: "" },
@@ -31,7 +32,7 @@ const UserSchema = new Schema({
 }, {timestamps: true, strict: false});
 
 const StudentSchema = new Schema({
-    nis: {type: String, required: true, unique: true},
+    nis: {type: String, required: true, unique: true, set: encrypt, get: decrypt},
     name: {type: String, required: true},
     class: {type: Number, required: true, min: 1, max: 6},
     gender: {type: String, enum: ["L", "P"], required: true},
@@ -60,6 +61,18 @@ const ClassRoomSchema = new Schema({
     waliKelas: {type: Schema.Types.ObjectId, ref: "User"}
 }, {timestamps: true});
 
+const GudangDataSchema = new Schema({
+    namaFile: {type: String, required: true},
+    urlFile: {type: String, required: true, set: encrypt, get: decrypt},
+    typeFile: {type: String, required: true},
+    ukuranFile: {type: Number, required: true},
+    pemilikId: {type: mongoose.Schema.Types.ObjectId, ref: "User", required: true}
+}, {timestamps: true, toJSON: {getters: true}, toObject: {getters: true}});
+
+if(mongoose.models.GudangData){
+    delete mongoose.models.GudangData;
+}
+
 if(mongoose.models.User) {
     delete mongoose.models.User;
 }
@@ -72,3 +85,4 @@ export const Student = models.Student || model("Student", StudentSchema);
 export const Attendance = models.Attendance || model("Attendance", AttendanceSchema);
 export const Grade = mongoose.models.Grade || mongoose.model("Grade", NilaiSchema);
 export const ClassRoom = models.ClassRoom || model("ClassRoom", ClassRoomSchema);
+export const GudangData = models.GudangData || model("GudangData", GudangDataSchema);

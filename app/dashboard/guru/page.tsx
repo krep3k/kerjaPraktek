@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { getTeacher, saveTeacher, deleteTeacher } from "@/components/lib/actions";
 import { User as UserIcon, Pencil, Trash2, X, PlusCircle, Eye } from "lucide-react";
 
@@ -20,6 +21,8 @@ interface Teacher {
 }
 
 export default function DataGuruPage() {
+    const {data: session} = useSession();
+    const userRole = (session?.user as any)?.role;
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
     const [isModalOpen, setModalOpen] = useState(false);
@@ -91,9 +94,11 @@ export default function DataGuruPage() {
                     <h1 className="text-2xl font-bold text-gray-900">Data Guru</h1>
                     <p className="text-gray-500 text-sm mt-1">Kelola akun dan profile guru yang terhormat</p>
                 </div>
-                <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 ease-in-out active:scale-95">
-                    <PlusCircle color="#ffffff" size={22} strokeWidth={2.5}></PlusCircle>
-                </button>
+                {userRole === "admin" && (
+                    <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 ease-in-out active:scale-95">
+                        <PlusCircle color="#ffffff" size={22} strokeWidth={2.5}/>
+                    </button>
+                )}
             </div>
             <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
                 <table className="w-full text-left text-sm text-gray-600 min-w-200">
@@ -103,7 +108,9 @@ export default function DataGuruPage() {
                             <th className="px-6 py-4">Id</th>
                             <th className="px-6 py-4">Nama Lengkap</th>
                             <th className="px-6 py-4">Status</th>
-                            <th className="px-6 py-4 text-center">Aksi</th>
+                            {userRole === "admin" && (
+                                <th className="px-6 py-4 text-center">Aksi</th>
+                            )}
                             <th className="px-6 py-4"></th>
                         </tr>
                     </thead>
@@ -121,7 +128,7 @@ export default function DataGuruPage() {
                                 </td>
                                 <td className="px-6 py-4 text-gray-700">{t.idGuru ? t.idGuru : "-"}</td>
                                 <td className="px-6 py-4 font-medium text-gray-900">{t.name}</td>
-                                <td className="px-6 py-4 text-center">
+                                <td className="px-6 py-4">
                                     <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${t.status === "aktif" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"}`}>
                                         {t.status === "aktif" ? (
                                             <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Aktif</>
@@ -130,16 +137,18 @@ export default function DataGuruPage() {
                                         )}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4">
-                                    <div className="flex gap-2 justify-center">
-                                        <button title="edit" onClick={() => handleEdit(t)} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                                            <Pencil className="wa-4 h-4"></Pencil>
-                                        </button>
-                                        <button title="delete" onClick={() => handleDelete(t._id, t.name)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
-                                            <Trash2 className="h-4 w-4"></Trash2>
-                                        </button>
-                                    </div>
-                                </td>
+                                {userRole === "admin" && (
+                                    <td className="px-6 py-4">
+                                        <div className="flex gap-2 justify-center">
+                                            <button title="edit" onClick={() => handleEdit(t)} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                                                <Pencil className="wa-4 h-4"></Pencil>
+                                            </button>
+                                            <button title="delete" onClick={() => handleDelete(t._id, t.name)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                                                <Trash2 className="h-4 w-4"></Trash2>
+                                            </button>
+                                        </div>
+                                    </td>
+                                )}
                                 <td className="px-6 py-4 flex items-center justify-center gap-3">
                                     <button onClick={() => setViewingTeacher(t)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition tooltip" title="Lihat Detail">
                                         <Eye className="w-5 h-5"></Eye>
@@ -178,8 +187,6 @@ export default function DataGuruPage() {
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher?.pendidikan || "-"}</span>
                                                         <span className="text-slate-500">Email Akun</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.email || "-"}</span>
-                                                        <span className="text-slate-500">Gmail</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.gmail || "-"}</span>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-4">
@@ -207,6 +214,8 @@ export default function DataGuruPage() {
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.jabatanFungsional || "-"}</span>
                                                         <span className="text-slate-500">TMT Mengajar</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.tmtMengajar || "-"}</span>
+                                                        <span className="text-slate-500">NIP</span>
+                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.nip || "-"}</span>
                                                         <span className="text-slate-500">NUPTK</span>
                                                         <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.nuptk || "-"}</span>
                                                     </div>
@@ -272,7 +281,7 @@ export default function DataGuruPage() {
                                                 <img src={photoBase64} alt="Preview" className="w-16 h-16 rounded-full object-cover border-2 border-blue-200 shadow-sm" />
                                             ) : (
                                                 <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center border border-dashed border-slate-300">
-                                                    <UserIcon w-6 h-6 text-slate-300></UserIcon>
+                                                    <UserIcon className="w-6 h-6 text-slate-300"/>
                                                 </div>
                                             )}
                                             <label htmlFor="pp"></label>
@@ -291,12 +300,15 @@ export default function DataGuruPage() {
                                             <input type="email" name="email" id="email" defaultValue={selectedTeacher?.email || ""} required className="w-full border-slate-200 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none border" />
                                         </div>
                                         <div>
-                                            <label htmlFor="gmail" className="block text-xs font-bold text-slate-500 uppercase mb-1">Gmail</label>
-                                            <input type="email" id="gmail" name="gmail" defaultValue={selectedTeacher?.gmail || ""} className="w-full border-slate-200 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none border" />
-                                        </div>
-                                        <div>
                                             <label htmlFor="password" className="block text-xs font-bold text-slate-500 uppercase mb-1">Password</label>
                                             <input type="password" name="password" id="password" required={!selectedTeacher} className="w-full border-slate-200 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none border" />
+                                        </div>
+                                        <div>
+                                            <label htmlFor="role" className="block text-sm font-bold text-slate-700">Role</label>
+                                            <select name="role" id="role" required className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-600/5 transition-all text-slate-800 appearance-none">
+                                                <option value="guru">Guru</option>
+                                                <option value="kepsek">Kepala Sekolah</option>
+                                            </select>
                                         </div>
                                     </div>
                                 </div>
