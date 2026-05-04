@@ -37,7 +37,7 @@ export default function LandingPage() {
               Tinggalkan cara lama. Kelola administrasi, basis data siswa, dan presensi tenaga pendidik dengan platform yang modern, cepat, dan mudah digunakan
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-              <Link href="/login" className="inline-flex justify-center items-center gap-3 bg-[#EDCD44] text-[#2D2735] px-8 py-4 rounded-full font-bold text-lg hover:bg-[#D6C43D] transition-all shadow-xl shadow-[#EDCD44]/20 hover:-translate-y-1">
+              <Link href="/login" className="inline-flex justify-center items-center gap-3 bg-[#3458da] text-[#efedf3] px-8 py-4 rounded-full font-bold text-lg hover:bg-[#1f238a] transition-all shadow-xl shadow-[#EDCD44]/20 hover:-translate-y-1">
                 Masuk Dashboard<ArrowRight className="w-5 h-5"/>
               </Link>
             </div>
