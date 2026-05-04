@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { connectToDatabase } from "./db";
 import { User } from "./models";
+import { hashEmail } from "./encryption";
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -19,7 +20,8 @@ export const authOptions: NextAuthOptions = {
                 }
                 try {
                     await connectToDatabase();
-                    const user = await User.findOne({email: credentials.email, status: "aktif"});
+                    const emailHash = hashEmail(credentials.email);
+                    const user = await User.findOne({emailHash: emailHash, status: "aktif"});
                     if(!user) throw new Error("User tidak ditemukan atau status nonaktif");
                     const isMatch = await bcrypt.compare(credentials.password, user.password);
                     if(!isMatch) throw new Error("Password salah");

@@ -6,7 +6,7 @@ export const ourFileRouter = {
         image: {maxFileSize: "16MB", maxFileCount: 1},
         pdf: {maxFileSize: "16MB", maxFileCount: 1},
         text: {maxFileSize: "16MB", maxFileCount: 1}
-    }).onUploadComplete(async ({metadata, file}) => {
+    }).onUploadComplete(async ({file}) => {
         console.log("Upload success. URL File: ", file.url);
         return {url: file.url, namaFile: file.name, ukuran: file.size};
     }),

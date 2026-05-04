@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { getTeacher, saveTeacher, deleteTeacher } from "@/components/lib/actions";
 import { User as UserIcon, Pencil, Trash2, X, PlusCircle, Eye } from "lucide-react";
@@ -53,7 +54,13 @@ export default function DataGuruPage() {
         if(confirm(`Apakah anda yakin ingin menghapus data guru "${name}"? Tindakan ini tidak dapat dibatalkan`)) {
             setLoading(true);
             const res = await deleteTeacher(id);
-            if(res.error) alert(res.error);
+            if(res.error) {
+                alert(res.error);
+            } else {
+                // Refresh data setelah delete berhasil
+                const freshTeacher = await getTeacher();
+                setTeachers(freshTeacher);
+            }
             setLoading(false);
         }
     }
@@ -91,18 +98,18 @@ export default function DataGuruPage() {
         <div className="space-y-6">
             <div className="flex justify-between items-end">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Data Guru</h1>
-                    <p className="text-gray-500 text-sm mt-1">Kelola akun dan profile guru yang terhormat</p>
+                    <h1 className="text-2xl font-bold text-foreground">Data Guru</h1>
+                    <p className="text-muted-foreground text-sm mt-1">Kelola akun dan profile guru yang terhormat</p>
                 </div>
                 {userRole === "admin" && (
-                    <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-blue-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/30 transition-all duration-200 ease-in-out active:scale-95">
-                        <PlusCircle color="#ffffff" size={22} strokeWidth={2.5}/>
+                    <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-primary text-primary-foreground font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 ease-in-out active:scale-95">
+                        <PlusCircle color="currentColor" size={22} strokeWidth={2.5}/>
                     </button>
                 )}
             </div>
-            <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
-                <table className="w-full text-left text-sm text-gray-600 min-w-200">
-                    <thead className="bg-blue-100 border-b border-gray-200 text-gray-700 uppercase font-semibold">
+            <div className="bg-card border border-border rounded-xl overflow-x-auto shadow-sm w-full">
+                <table className="w-full text-left text-sm text-muted-foreground min-w-200">
+                    <thead className="bg-accent border-b border-border text-accent-foreground uppercase font-semibold">
                         <tr>
                             <th className="px-6 py-4">Profil</th>
                             <th className="px-6 py-4">Id</th>
@@ -116,133 +123,133 @@ export default function DataGuruPage() {
                     </thead>
                     <tbody>
                         {teachers.map((t) => (
-                            <tr key={t._id} className="border-b border-gray-100 hover:bg-gray-50">
+                            <tr key={t._id} className="border-b border-border hover:bg-muted">
                                 <td className="px-6 py-4">
                                     {t.profilePicture ? (
-                                        <img src={t.profilePicture} alt={t.name} className="w-10 h-10 rounded-full object-cover border border-gray-300" />
+                                        <Image src={t.profilePicture} alt={t.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-border" unoptimized />
                                     ) : (
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-gray-500">
+                                        <div className="w-10 h-10 bg-muted rounded-full flex items-center justify-center text-muted-foreground">
                                             {t.name.charAt(0)}
                                         </div>
                                     )}
                                 </td>
-                                <td className="px-6 py-4 text-gray-700">{t.idGuru ? t.idGuru : "-"}</td>
-                                <td className="px-6 py-4 font-medium text-gray-900">{t.name}</td>
+                                <td className="px-6 py-4 text-foreground">{t.idGuru ? t.idGuru : "-"}</td>
+                                <td className="px-6 py-4 font-medium text-foreground">{t.name}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${t.status === "aktif" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"}`}>
+                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${t.status === "aktif" ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"}`}>
                                         {t.status === "aktif" ? (
-                                            <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Aktif</>
+                                            <><span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> Aktif</>
                                         ) : (
-                                            <><span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Nonaktif</>
+                                            <><span className="w-1.5 h-1.5 rounded-full bg-destructive"></span>Nonaktif</>
                                         )}
                                     </span>
                                 </td>
                                 {userRole === "admin" && (
                                     <td className="px-6 py-4">
                                         <div className="flex gap-2 justify-center">
-                                            <button title="edit" onClick={() => handleEdit(t)} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                                            <button title="edit" onClick={() => handleEdit(t)} className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition">
                                                 <Pencil className="wa-4 h-4"></Pencil>
                                             </button>
-                                            <button title="delete" onClick={() => handleDelete(t._id, t.name)} className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                                            <button title="delete" onClick={() => handleDelete(t._id, t.name)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition">
                                                 <Trash2 className="h-4 w-4"></Trash2>
                                             </button>
                                         </div>
                                     </td>
                                 )}
                                 <td className="px-6 py-4 flex items-center justify-center gap-3">
-                                    <button onClick={() => setViewingTeacher(t)} className="p-2 text-blue-600 hover:bg-blue-100 rounded-lg transition tooltip" title="Lihat Detail">
+                                    <button onClick={() => setViewingTeacher(t)} className="p-2 text-primary hover:bg-primary/10 rounded-lg transition tooltip" title="Lihat Detail">
                                         <Eye className="w-5 h-5"></Eye>
                                     </button>
                                 </td>
                                 {viewingTeacher && (
-                                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-                                        <div className="bg-white w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                                            <div className="bg-linear-to-r from-blue-600 to-blue-800 p-6 flex justify-between items-center text-white">
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-/70 backdrop-blur-sm">
+                                        <div className="bg-card w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                            <div className="bg-linear-to-r from-primary bg-amber-300 to-primary-foreground/80 p-6 flex justify-between items-center text-primary-foreground">
                                                 <div className="flex items-center gap-4">
                                                     {viewingTeacher.profilePicture ? (
-                                                        <img src={viewingTeacher.profilePicture} alt="Profile" className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-md" />
+                                                        <Image src={viewingTeacher.profilePicture} alt="Profile" width={64} height={64} className="w-16 h-16 rounded-full object-cover border-2 border-card shadow-md" unoptimized />
                                                     ) : (
-                                                        <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl font-bold border-2 border-white/50">
+                                                        <div className="w-16 h-16 rounded-full bg-card/20 flex items-center justify-center text-card-foreground text-2xl font-bold border-2 border-card/50">
                                                             {viewingTeacher.name.charAt(0)}
                                                         </div>
                                                     )}
                                                     <div>
                                                         <h2 className="text-xl font-bold">{viewingTeacher.name}</h2>
-                                                        <p className="text-blue-100 text-sm font-medium">{viewingTeacher.jabatan || "Guru"} • {viewingTeacher.idGuru || "-"}</p>
+                                                        <p className="text-primary-foreground/80 text-sm font-medium">{viewingTeacher.jabatan || "Guru"}  {viewingTeacher.idGuru || "-"}</p>
                                                     </div>
                                                 </div>
-                                                <button onClick={() => setViewingTeacher(null)} className="p-2 hover:bg-white/20 rounded-full transition" title="X"><X className="w-6 h-6"></X></button>
+                                                <button onClick={() => setViewingTeacher(null)} className="p-2 hover:bg-card/20 rounded-full transition" title="X"><X className="w-6 h-6"></X></button>
                                             </div>
-                                            <div className="p-6 max-h-[70vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm">
+                                            <div className="p-6 max-h-[70vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm bg-amber-200">
                                                 <div className="space-y-4">
-                                                    <h3 className="font-bold text-slate-800 border-b pb-2 text-base">Profile Guru</h3>
+                                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Profile Guru</h3>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <span className="text-slate-500">TTL</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.tempatLahir || "-"}, {viewingTeacher.tanggalLahir}</span>
-                                                        <span className="text-slate-500">Gender</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.jenisKelamin || "-"}</span>
-                                                        <span className="text-slate-500">No. WhatsApp</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.noTelp || "-"}</span>
-                                                        <span className="text-slate-500">Pendidikan Terakhir</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher?.pendidikan || "-"}</span>
-                                                        <span className="text-slate-500">Email Akun</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.email || "-"}</span>
+                                                        <span className="text-muted-foreground">TTL</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.tempatLahir || "-"}, {viewingTeacher.tanggalLahir}</span>
+                                                        <span className="text-muted-foreground">Gender</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jenisKelamin || "-"}</span>
+                                                        <span className="text-muted-foreground">No. WhatsApp</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.noTelp || "-"}</span>
+                                                        <span className="text-muted-foreground">Pendidikan Terakhir</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher?.pendidikan || "-"}</span>
+                                                        <span className="text-muted-foreground">Email Akun</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.email || "-"}</span>
                                                     </div>
                                                 </div>
                                                 <div className="space-y-4">
-                                                    <h3 className="font-bold text-slate-800 border-b pb-2 text-base">Data Kedinasan</h3>
+                                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Data Kedinasan</h3>
                                                     <div className="grid grid-cols-3 gap-2">
-                                                        <span className="text-slate-500">Status Pegawai</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: <span className="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md">{viewingTeacher.statusKepegawaian || "-"}</span></span>
-                                                        <span className="text-slate-500">Golongan/Ruang</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.golongan || "-"}</span>
-                                                        <span className="text-slate-500">Jabatan Struktural</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.jabatanStruktural || "-"}</span>
+                                                        <span className="text-muted-foreground">Status Pegawai</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: <span className="bg-success/10 text-success px-2 py-0.5 rounded-md">{viewingTeacher.statusKepegawaian || "-"}</span></span>
+                                                        <span className="text-muted-foreground">Golongan/Ruang</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.golongan || "-"}</span>
+                                                        <span className="text-muted-foreground">Jabatan Struktural</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jabatanStruktural || "-"}</span>
                                                         {viewingTeacher.jabatanStruktural === "Guru Kelas" && (
                                                             <>
-                                                                <span className="text-slate-500">Mengampu kelas</span>
-                                                                <span className="col-span-2 font-semibold text-blue-600">: {viewingTeacher.kelas} {viewingTeacher.rombel}</span>
+                                                                <span className="text-muted-foreground">Mengampu kelas</span>
+                                                                <span className="col-span-2 font-semibold text-primary">: {viewingTeacher.kelas} {viewingTeacher.rombel}</span>
                                                             </>
                                                         )}
                                                         {viewingTeacher.jabatanStruktural === "Guru Mapel" && (
                                                             <>
-                                                                <span className="text-slate-500">Mata Pelajaran</span>
-                                                                <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.mataPelajaran || "-"}</span>
+                                                                <span className="text-muted-foreground">Mata Pelajaran</span>
+                                                                <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.mataPelajaran || "-"}</span>
                                                             </>
                                                         )}
-                                                        <span className="text-slate-500">Jabatan Fungsional</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.jabatanFungsional || "-"}</span>
-                                                        <span className="text-slate-500">TMT Mengajar</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.tmtMengajar || "-"}</span>
-                                                        <span className="text-slate-500">NIP</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.nip || "-"}</span>
-                                                        <span className="text-slate-500">NUPTK</span>
-                                                        <span className="col-span-2 font-semibold text-slate-800">: {viewingTeacher.nuptk || "-"}</span>
+                                                        <span className="text-muted-foreground">Jabatan Fungsional</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jabatanFungsional || "-"}</span>
+                                                        <span className="text-muted-foreground">TMT Mengajar</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.tmtMengajar || "-"}</span>
+                                                        <span className="text-muted-foreground">NIP</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.nip || "-"}</span>
+                                                        <span className="text-muted-foreground">NUPTK</span>
+                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.nuptk || "-"}</span>
                                                     </div>
                                                 </div>
                                                 <div className="md:col-span-2 space-y-4 pt-2">
-                                                    <h3 className="font-bold text-slate-800 border-b pb-2 text-base">Alamat Domisili</h3>
+                                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Alamat Domisili</h3>
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                         <div>
-                                                            <p className="text-slate-500 text-xs mb-1">Alamat Jalan</p>
-                                                            <p className="font-semibold text-slate-800">{viewingTeacher.alamatLengkap || "-"}</p>
+                                                            <p className="text-muted-foreground text-xs mb-1">Alamat Jalan</p>
+                                                            <p className="font-semibold text-foreground">{viewingTeacher.alamatLengkap || "-"}</p>
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-4">
                                                             <div>
-                                                                <p className="text-slate-500 text-xs mb-1">Desa/Kelurahan</p>
-                                                                <p className="font-semibold text-slate-800">{viewingTeacher.desa || "-"}</p>
+                                                                <p className="text-muted-foreground text-xs mb-1">Desa/Kelurahan</p>
+                                                                <p className="font-semibold text-foreground">{viewingTeacher.desa || "-"}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-slate-500 text-xs mb-1">Kecamatan</p>
-                                                                <p className="font-semibold text-slate-800">{viewingTeacher.kecamatan || "-"}</p>
+                                                                <p className="text-muted-foreground text-xs mb-1">Kecamatan</p>
+                                                                <p className="font-semibold text-foreground">{viewingTeacher.kecamatan || "-"}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-slate-500 text-xs mb-1">Kabupaten/Kota</p>
-                                                                <p className="font-semibold text-slate-800">{viewingTeacher.kabupaten || "-"}</p>
+                                                                <p className="text-muted-foreground text-xs mb-1">Kabupaten/Kota</p>
+                                                                <p className="font-semibold text-foreground">{viewingTeacher.kabupaten || "-"}</p>
                                                             </div>
                                                             <div>
-                                                                <p className="text-slate-500 text-xs mb-1">Provinsi</p>
-                                                                <p className="font-semibold text-slate-800">{viewingTeacher.provinsi}</p>
+                                                                <p className="text-muted-foreground text-xs mb-1">Provinsi</p>
+                                                                <p className="font-semibold text-foreground">{viewingTeacher.provinsi}</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -255,45 +262,45 @@ export default function DataGuruPage() {
                             </tr>
                         ))}
                         {teachers.length === 0 && (
-                            <tr><td colSpan={11} className="text-center py-8 text-gray-500">Belum ada guru</td></tr>
+                            <tr><td colSpan={11} className="text-center py-8 text-muted-foreground">Belum ada guru</td></tr>
                         )}
                     </tbody>
                 </table>
             </div>
             {isModalOpen && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-3xl w-full p-6 border border-gray-100 max-h-[85vh] overflow-y-auto relative">
-                        <button title="X" onClick={() => setModalOpen(false)} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 rounded-full p-1 hover:bg-gray-100 transition">
+                <div className="fixed inset-0 bg-/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-card rounded-xl shadow-2xl max-w-3xl w-full p-6 border border-border max-h-[85vh] overflow-y-auto relative">
+                        <button title="X" onClick={() => setModalOpen(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted transition">
                             <X className="w-4 h-4"></X>
                         </button>
-                        <h2 className="text-xl font-bold text-gray-900 mb-6">{selectedTeacher ? "Edit Pofile Guru" : "Tambah Akun Guru Baru"}</h2>
+                        <h2 className="text-xl font-bold text-foreground mb-6">{selectedTeacher ? "Edit Pofile Guru" : "Tambah Akun Guru Baru"}</h2>
                         <form action="" onSubmit={handleSubmit} key={selectedTeacher?._id || "new"} className="flex flex-col max-h-[85vh]">
                             <label htmlFor="hidden"></label>
                             <input type="hidden" name="id" value={selectedTeacher?._id || ""} />
                             <input type="hidden" name="profilePicture" value={photoBase64 || ""} />
                             <div className="overflow-y-auto pr-2 space-y-6 pb-6 custom-scrollbar">
-                                <div className="bg-blue-50/30 p-5 rounded-2xl border border-blue-100 shadow-sm relative overflow-hidden">
-                                    <div className="absolute left-0 top-0 w-1.5 h-full bg-blue-500"></div>
-                                    <h3 className="font-bold text-blue-800 border-b border-blue-100 pb-2 mb-4 flex items-center gap-2">Profile</h3>
+                                <div className="bg-accent/30 bg-gray-100 p-5 rounded-2xl border border-accent shadow-sm relative overflow-hidden">
+                                    <div className="absolute left-0 top-0 w-1.5 h-full bg-primary"></div>
+                                    <h3 className="font-bold text-primary border-b border-accent pb-2 mb-4 flex items-center gap-2">Profile</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="md:col-span-2 flex items-center gap-4 mb-2">
                                             {photoBase64 ? (
-                                                <img src={photoBase64} alt="Preview" className="w-16 h-16 rounded-full object-cover border-2 border-blue-200 shadow-sm" />
+                                                <Image src={photoBase64} alt="Preview" width={64} height={64} className="w-16 h-16 rounded-full object-cover border-2 border-accent shadow-sm" unoptimized />
                                             ) : (
-                                                <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center border border-dashed border-slate-300">
-                                                    <UserIcon className="w-6 h-6 text-slate-300"/>
+                                                <div className="w-16 h-16 rounded-full bg-card flex items-center justify-center border border-dashed border-border">
+                                                    <UserIcon className="w-6 h-6 text-muted-foreground"/>
                                                 </div>
                                             )}
                                             <label htmlFor="pp"></label>
-                                            <input id="pp" name="pp" title="pp" type="file" accept="image/*" onChange={handleFileChange} className="text-sm text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200 cursor-pointer" />
+                                            <input id="pp" name="pp" title="pp" type="file" accept="image/*" onChange={handleFileChange} className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-accent file:text-accent-foreground hover:file:bg-accent/70 cursor-pointer" />
                                         </div>
                                         <div>
-                                            <label htmlFor="name" className="block text-xs font-bold text-slate-500 uppercase mb-1">Nama Lengkap</label>
-                                            <input type="text" name="name" id="name" defaultValue={selectedTeacher?.name || ""} required className="w-full border-slate-200 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none border" placeholder="Contoh: Budi Santoso, S.Pd" />
+                                            <label htmlFor="name" className="block text-xs font-bold text-muted-foreground uppercase mb-1">Nama Lengkap</label>
+                                            <input type="text" name="name" id="name" defaultValue={selectedTeacher?.name || ""} required className="w-full border-border rounded-xl p-2.5 text-sm focus:ring-primary focus:border-primary outline-none border bg-background text-foreground" placeholder="Contoh: Budi Santoso, S.Pd" />
                                         </div>
                                         <div>
-                                            <label htmlFor="idGuru" className="block text-xs font-bold text-slate-500 uppercase mb-1">Id Guru</label>
-                                            <input type="text" id="idGuru" name="idGuru" defaultValue={selectedTeacher?.idGuru || ""} required className="w-full border-slate-200 rounded-xl p-2.5 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none border font-mono" placeholder="ID.2024..." />
+                                            <label htmlFor="idGuru" className="block text-xs font-bold text-muted-foreground uppercase mb-1">Id Guru</label>
+                                            <input type="text" id="idGuru" name="idGuru" defaultValue={selectedTeacher?.idGuru || ""} required className="w-full border-border rounded-xl p-2.5 text-sm focus:ring-primary focus:border-primary outline-none border font-mono bg-background text-foreground" placeholder="ID.2024..." />
                                         </div>
                                         <div>
                                             <label htmlFor="email" className="block text-xs font-bold text-slate-500 uppercase mb-1">Email</label>
@@ -312,7 +319,7 @@ export default function DataGuruPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-amber-50/30 p-5 rounded-2xl border border-amber-100 shadow-sm relative overflow-hidden">
+                                <div className="bg-amber-100 p-5 rounded-2xl border border-amber-100 shadow-sm relative overflow-hidden">
                                     <div className="absolute left-0 top-0 w-1.5 h-full bg-amber-500"></div>
                                     <h3 className="font-bold text-amber-800 border-b border-amber-100 pb-2 mb-4 flex items-center gap-2">Data Pribadi</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,7 +344,7 @@ export default function DataGuruPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-emerald-50/30 p-5 rounded-2xl border border-emerald-100 shadow-sm relative overflow-hidden">
+                                <div className="bg-emerald-100 p-5 rounded-2xl border border-emerald-100 shadow-sm relative overflow-hidden">
                                     <div className="absolute left-0 top-0 w-1.5 h-full bg-emerald-500"></div>
                                     <h3 className="font-bold text-emerald-800 border-b border-emerald-100 pb-2 mb-4 flex items-center gap-2">Data Kedinasan</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -369,7 +376,7 @@ export default function DataGuruPage() {
                                                     if(kls) kls.value = "";
                                                     if(rmb) rmb.value = "";
                                                 }}} className="w-full border-slate-200 rounded-xl p-2.5 text-sm outline-none border">
-                                                {["Guru Kelas", "Guru Mapel", "Kepala Sekolah", "Wakil Kepala Sekolah", "Staff"].map(s => <option key={s} value={s}>{s}</option>)}
+                                                {["Guru Kelas", "Guru Mapel", "Guru Ekskul", "Kepala Sekolah"].map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                         </div>
                                         <div>
@@ -384,7 +391,8 @@ export default function DataGuruPage() {
                                                 <option value="">-- Guru Kelas (Kosongkan) --</option>
                                                 <option value="PAI">Pendidikan Agama Islam (PAI)</option>
                                                 <option value="PJOK">PJOK</option>
-                                                <option value="Lainnya">Lainnya / Ekstrakurikuler</option>
+                                                <option value="BTQ">BTQ</option>
+                                                <option value="TIK">TIK</option>
                                             </select>
                                         </div>
                                         <div className="grid grid-cols-2 gap-3 mt-3">
@@ -430,7 +438,7 @@ export default function DataGuruPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="bg-purple-50/30 p-5 rounded-2xl border border-purple-100 shadow-sm relative overflow-hidden">
+                                <div className="bg-purple-100 p-5 rounded-2xl border border-purple-100 shadow-sm relative overflow-hidden">
                                     <div className="absolute left-0 top-0 w-1.5 h-full bg-purple-500"></div>
                                     <h3 className="font-bold text-purple-800 border-b border-purple-100 pb-2 mb-4 flex items-center gap-2">Alamat Domisili</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -457,7 +465,7 @@ export default function DataGuruPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-slate-200 bg-white sticky bottom-0">
+                            <div className="flex justify-end bg-blend-overlay gap-3 pt-4 mt-2 border-t border-slate-200 bg-white sticky bottom-0 backdrop:blur-sm">
                                 <button type="button" onClick={() => setModalOpen(false)} className="px-6 py-2.5 text-slate-600 font-bold bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
                                 <button type="submit" disabled={loading} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-70 transition-all shadow-md active:scale-95">
                                     {loading ? "Memproses..." : (selectedTeacher ? "Simpan perubahan" : "Simpan Guru")}

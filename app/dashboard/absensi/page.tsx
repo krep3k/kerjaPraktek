@@ -108,7 +108,7 @@ export default function AbsensiPage() {
                                 <td className="p-3">{idx + 1}</td>
                                 <td className="p-3 font-medium">{s.name}</td>
                                 <td className="p-3 text-center">
-                                    <select title="absensi" name="" id="" value={absensiData[s._id]?.status || "Hadir"} onChange={e => handleAbsenChange(s._id, "status", e.target.value)} className={`border p-1 rounded-md font-semibold ${absensiData[s._id]?.status === 'Hadir' ? 'text-green-600' : 'text-red-600'}`}>
+                                    <select title="absensi" name="" id="" value={absensiData[s._id]?.status || "Hadir"} onChange={e => handleAbsenChange(s._id, "status", e.target.value)} className={`border px-2.5 py-1.5 rounded-md font-semibold text-xs uppercase ${ absensiData[s._id]?.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : absensiData[s._id]?.status === 'Sakit' ? 'bg-amber-100 text-amber-700 border-amber-200' : absensiData[s._id]?.status === 'Izin' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-rose-100 text-rose-700 border-rose-200'}`}>
                                         <option value="Hadir">Hadir</option>
                                         <option value="Sakit">Sakit</option>
                                         <option value="Izin">Izin</option>

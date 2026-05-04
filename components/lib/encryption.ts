@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;;
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
 const IV_LENGTH = 16;
 
 export function encrypt(text: string) {
@@ -22,7 +22,11 @@ export function decrypt(text: string) {
         let decrypted = dechiper.update(encryptedText);
         decrypted = Buffer.concat([decrypted, dechiper.final()]);
         return decrypted.toString();
-    } catch(error) {
+    } catch {
         return text;
     }
+}
+
+export function hashEmail(email: string) {
+    return crypto.createHash("sha256").update(email.toLowerCase().trim()).digest("hex");
 }

@@ -1,0 +1,61 @@
+import type { Config } from "tailwindcss";
+
+export default {
+  darkMode: "class",
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--background)",
+        surface: "var(--surface)",
+        foreground: "var(--foreground)",
+        muted: "var(--muted)",
+        "muted-foreground": "var(--muted-foreground)",
+        border: "var(--border)",
+        card: "var(--card)",
+        primary: "var(--primary)",
+        "primary-foreground": "var(--primary-foreground)",
+        accent: "var(--accent)",
+        "accent-foreground": "var(--accent-foreground)",
+        destructive: "var(--destructive)",
+        "destructive-foreground": "var(--destructive-foreground)",
+        success: "var(--success)",
+        "success-foreground": "var(--success-foreground)",
+        overlay: "var(--overlay)",
+        ring: "var(--ring)",
+      },
+      backgroundColor: {
+        background: "var(--background)",
+        surface: "var(--surface)",
+        card: "var(--card)",
+        accent: "var(--accent)",
+        destructive: "var(--destructive)",
+        success: "var(--success)",
+      },
+      textColor: {
+        foreground: "var(--foreground)",
+        muted: "var(--muted)",
+        "muted-foreground": "var(--muted-foreground)",
+        primary: "var(--primary)",
+        "primary-foreground": "var(--primary-foreground)",
+        accent: "var(--accent)",
+        "accent-foreground": "var(--accent-foreground)",
+        destructive: "var(--destructive)",
+        "destructive-foreground": "var(--destructive-foreground)",
+        success: "var(--success)",
+        "success-foreground": "var(--success-foreground)",
+      },
+      borderColor: {
+        border: "var(--border)",
+        primary: "var(--primary)",
+        accent: "var(--accent)",
+        destructive: "var(--destructive)",
+        success: "var(--success)",
+      },
+    },
+  },
+  plugins: [],
+} satisfies Config;

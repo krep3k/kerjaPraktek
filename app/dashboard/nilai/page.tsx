@@ -18,23 +18,33 @@ export default function RekapNilaiPage() {
     const [nilaiData, setNilaiData] = useState<any>({});
     const [loading, setLoading] = useState(false);
 
-    const mapelOption = getMataPelajaranByKelas(kelas).semuaMapel;
+    const mataPelajaranOption = getMataPelajaranByKelas(kelas);
     const rombelOption = getRombelByKelas(kelas);
+    const isEkskulMapel = mataPelajaranOption.ekskul.includes(mapel);
     
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
             const studentList = await getStudentsFiltered(kelas, rombel);
             setStudents(studentList);
-            const records = await getGNilaiRecord(kelas, rombel, semester, mapel, jenisNilai, tanggal);
+
+            const jenisForQuery = isEkskulMapel ? "ekskul" : jenisNilai;
+            const records = await getGNilaiRecord(kelas, rombel, semester, mapel, jenisForQuery, tanggal);
             const recordMap: any = {};
-            studentList.forEach((s: any) => {recordMap[s._id] = 0;});
-            records.forEach((r: any) => {recordMap[r.studentId] = r.nilai;});
+
+            studentList.forEach((s: any) => {
+                recordMap[s._id] = isEkskulMapel ? "-" : 0;
+            });
+
+            records.forEach((r: any) => {
+                recordMap[r.studentId] = isEkskulMapel ? r.nilaiEkskul : r.nilai;
+            });
+
             setNilaiData(recordMap);
             setLoading(false);
         };
         loadData();
-    }, [kelas, rombel, semester, mapel, jenisNilai, tanggal]);
+    }, [kelas, rombel, semester, mapel, jenisNilai, tanggal, isEkskulMapel]);
 
     const handleKelasChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const kelasBaru = Number(e.target.value);
@@ -44,24 +54,44 @@ export default function RekapNilaiPage() {
             setMapel(daftarMapelBaru[0] || "");
         }
         const daftarRombelBaru = getRombelByKelas(kelasBaru);
-        if(!daftarMapelBaru.includes(rombel)) {
+        if(!daftarRombelBaru.includes(rombel)) {
             setRombel(daftarRombelBaru[0] || "");
+        }
+    };
+
+    const handleMapelChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const mapelBaru = e.target.value;
+        setMapel(mapelBaru);
+
+        const mataPelajaranBaru = getMataPelajaranByKelas(kelas);
+        if (mataPelajaranBaru.ekskul.includes(mapelBaru)) {
+            setJenisNilai("ekskul");
+        } else if (jenisNilai === "ekskul") {
+            setJenisNilai("Ulangan Harian");
         }
     };
 
     const handleSave = async () => {
         setLoading(true);
-        const dataToSave = students.map(s => ({
-            studentId: s._id,
-            nilai: Number(nilaiData[s._id]) || 0
-        }));
-        const res = await saveBulkNilai(dataToSave, kelas, rombel, semester, mapel, jenisNilai, tanggal);
+        const dataToSave = students.map(s => {
+            if (isEkskulMapel) {
+                return {
+                    studentId: s._id,
+                    nilaiEkskul: nilaiData[s._id] || "-"
+                };
+            }
+            return {
+                studentId: s._id,
+                nilai: Number(nilaiData[s._id]) || 0
+            };
+        });
+        const res = await saveBulkNilai(dataToSave, kelas, rombel, semester, mapel, isEkskulMapel ? "ekskul" : jenisNilai, tanggal);
         if(res.error){
             alert("Gagal menyimpan data:" + res.error);
         } else {
-            alert(`Data nilai ${jenisNilai} tanggal ${tanggal} berhasil disimpan!`);
-            setLoading(false);
+            alert(`Data nilai ${isEkskulMapel ? `ekskul ${mapel}` : jenisNilai} tanggal ${tanggal} berhasil disimpan!`);
         }
+        setLoading(false);
     };
     return (
         <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
@@ -95,21 +125,37 @@ export default function RekapNilaiPage() {
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Mata Pelajaran
-                    <select title="mapel" name="mapel" id="mapel" value={mapel} onChange={e => setMapel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
-                        {mapelOption.map(m => (
+                    <select title="mapel" name="mapel" id="mapel" value={mapel} onChange={handleMapelChange} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                        {mataPelajaranOption.mapelGuruKelas.map(m => (
+                            <option value={m} key={m}>{m}</option>
+                        ))}
+                        {mataPelajaranOption.mapelBidangStudi.map(m => (
+                            <option value={m} key={m}>{m}</option>
+                        ))}
+                        {mataPelajaranOption.ekskul.map(m => (
                             <option value={m} key={m}>{m}</option>
                         ))}
                     </select>
                 </div>
                 <div>
-                    <label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Jenis Penilaian
-                        <select name="" id="" value={jenisNilai} onChange={e => setJenisNilai(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                    <label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Jenis Penilaian</label>
+                    {isEkskulMapel ? (
+                        <input
+                            id="jenisNilaiText"
+                            title="Jenis nilai ekskul"
+                            type="text"
+                            value="Ekstrakurikuler"
+                            disabled
+                            className="w-full border border-gray-300 p-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium cursor-not-allowed"
+                        />
+                    ) : (
+                        <select title="Jenis Penilaian" name="jenisNilai" id="jenisNilaiSelect" value={jenisNilai} onChange={e => setJenisNilai(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                             <option value="Tugas">Tugas</option>
-                            <option value="UH">Ulangan Harian</option>
+                            <option value="Ulangan Harian">Ulangan Harian</option>
                             <option value="UTS">UTS</option>
                             <option value="UAS">UAS</option>
                         </select>
-                    </label>
+                    )}
                 </div>
                 <div>
                     <label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal</label>
@@ -132,8 +178,33 @@ export default function RekapNilaiPage() {
                                 <td className="p-3">{idx + 1}</td>
                                 <td className="p-3 font-medium">{s.name}</td>
                                 <td className="p-3 text-center">
-                                    <label htmlFor="nilai"></label>
-                                    <input id="nilai" type="number" min={0} max={100} value={nilaiData[s._id] || ""} onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})} className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500" placeholder="Nilai" />
+                                    <label htmlFor={`nilai-${s._id}`} className="sr-only">Nilai siswa</label>
+                                    {isEkskulMapel ? (
+                                        <select
+                                            id={`nilai-${s._id}`}
+                                            title="Nilai ekskul"
+                                            value={nilaiData[s._id] || "-"}
+                                            onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})}
+                                            className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                        >
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                            <option value="C">C</option>
+                                            <option value="-">-</option>
+                                        </select>
+                                    ) : (
+                                        <input
+                                            id={`nilai-${s._id}`}
+                                            title="Nilai siswa"
+                                            type="number"
+                                            min={0}
+                                            max={100}
+                                            value={nilaiData[s._id] || ""}
+                                            onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})}
+                                            className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                            placeholder="Nilai"
+                                        />
+                                    )}
                                 </td>
                             </tr>
                         ))}

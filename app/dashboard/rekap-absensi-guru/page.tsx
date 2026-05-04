@@ -1,10 +1,12 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
-import { getTeacherAttendanceRecap, getAvailableAttendanceDates } from "@/components/lib/actions";
+import { getTeacherAttendanceRecap, getAvailableAttendanceDates, getTeacherAttendanceMonthlySummary } from "@/components/lib/actions";
 import { Download, Search, CalendarDays, Calendar, ChevronLeft, XCircle } from "lucide-react";
 
 export default function RekapAbsensiGuru() {
+    const [isMounted, setIsMounted] = useState(false);
     const [viewMode, setViewMode] = useState<"list" | "detail" | "range">("list");
     const [allDates, setAllDates] = useState<string[]>([]);
     const [displayedDates, setDisplayedDates] = useState<string[]>([]);
@@ -12,9 +14,34 @@ export default function RekapAbsensiGuru() {
     const [start, setStart] = useState("");
     const [end, setEnd] = useState("");
     const [data, setData] = useState<any[]>([]);
+    const [monthlyMonth, setMonthlyMonth] = useState(new Date().toISOString().slice(0, 7));
+    const [monthlySummary, setMonthlySummary] = useState<any[]>([]);
+    const [monthlyLoading, setMonthlyLoading] = useState(false);
     const [loading, setLoading] = useState(false);
 
+    const monthOptions = [
+        { value: "01", label: "Januari" },
+        { value: "02", label: "Februari" },
+        { value: "03", label: "Maret" },
+        { value: "04", label: "April" },
+        { value: "05", label: "Mei" },
+        { value: "06", label: "Juni" },
+        { value: "07", label: "Juli" },
+        { value: "08", label: "Agustus" },
+        { value: "09", label: "September" },
+        { value: "10", label: "Oktober" },
+        { value: "11", label: "November" },
+        { value: "12", label: "Desember" }
+    ];
+
+    const yearOptions = [
+        new Date().getFullYear() - 1,
+        new Date().getFullYear(),
+        new Date().getFullYear() + 1
+    ];
+
     useEffect(() => {
+        setIsMounted(true);
         const loadDates = async () => {
             setLoading(true);
             const dates = await getAvailableAttendanceDates();
@@ -45,6 +72,18 @@ export default function RekapAbsensiGuru() {
         setDisplayedDates(filtered);
     };
 
+    const handleLoadMonthlySummary = async () => {
+        setMonthlyLoading(true);
+        try {
+            const summary = await getTeacherAttendanceMonthlySummary(monthlyMonth);
+            setMonthlySummary(summary);
+        } catch (error) {
+            console.error("Gagal memuat rekap bulanan guru:", error);
+            alert("Gagal memuat rekap bulanan guru. Silakan coba lagi.");
+        }
+        setMonthlyLoading(false);
+    };
+
     const handleResetFilter = () => {
         setStart("");
         setEnd("");
@@ -69,15 +108,31 @@ export default function RekapAbsensiGuru() {
         a.click();
     };
 
+    const exportMonthlySummaryToCSV = () => {
+        if(monthlySummary.length === 0) return alert("Tidak ada data bulanan untuk diekspor");
+        const headers = ["Nama Guru,ID Guru,Jabatan Struktural,Hadir,Sakit,Izin,Alpha,Total\n"];
+        const rows = monthlySummary.map(i => `${i.name},${i.idGuru},${i.jabatanStruktural},${i.hadir},${i.sakit},${i.izin},${i.alpa},${i.total}\n`);
+        const blob = new Blob([headers + rows.join("")], {type: "text/csv"});
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `Rekap_Absensi_Guru_Bulanan_${monthlyMonth}.csv`;
+        a.click();
+    };
+
     const formatDateIndo = (dateString: string) => {
         const options: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         return new Date(dateString).toLocaleDateString("id-ID", options);
     };
 
+    if(!isMounted) {
+        return null;
+    }
+
     return (
         <div className="p-6">
             <h1 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
-                <CalendarDays className="w-6 h-6 text-blue-600"/>Rekap Absensi Guru
+                <CalendarDays className="w-6 h-6 text-blue-600"/>Rekapitulasi Absensi Guru
             </h1>
             {viewMode === "list" && (
                 <div className="space-y-6">
@@ -101,6 +156,68 @@ export default function RekapAbsensiGuru() {
                                 )}
                             </div>
                         </div>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+                        <h3 className="font-bold text-slate-700 text-sm mb-4 flex items-center gap-2"><Calendar className="w-5 h-5 text-emerald-600"/>Rekap Bulanan Absensi Guru</h3>
+                        <div className="flex flex-wrap gap-3 items-end mb-4">
+                            <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label htmlFor="month" className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Bulan</label>
+                                    <select id="month" title="Bulan" value={monthlyMonth.slice(5)} onChange={e => setMonthlyMonth(`${monthlyMonth.slice(0, 4)}-${e.target.value}`)} className="border p-2 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                        {monthOptions.map(option => (
+                                            <option key={option.value} value={option.value}>{option.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label htmlFor="year" className="block text-[10px] font-bold mb-1 text-slate-500 uppercase">Tahun</label>
+                                    <select id="year" title="Tahun" value={monthlyMonth.slice(0, 4)} onChange={e => setMonthlyMonth(`${e.target.value}-${monthlyMonth.slice(5)}`)} className="border p-2 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                                        {yearOptions.map(y => (
+                                            <option key={y} value={y}>{y}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                            <button onClick={handleLoadMonthlySummary} className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-blue-700 transition-colors">Tampilkan Rekap Bulanan</button>
+                            <button onClick={() => setMonthlySummary([])} className="bg-slate-50 text-slate-700 px-4 py-2 rounded-xl font-bold hover:bg-slate-100 transition-colors border border-slate-200">Reset Bulanan</button>
+                            <button onClick={exportMonthlySummaryToCSV} disabled={monthlySummary.length === 0} className="bg-emerald-600 text-white px-5 py-2 rounded-xl font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">Export Bulanan CSV</button>
+                        </div>
+                        {monthlyLoading ? (
+                            <div className="text-slate-500 text-sm font-medium">Memuat rekap bulanan...</div>
+                        ) : monthlySummary.length === 0 ? (
+                            <div className="text-slate-500 text-sm">Pilih bulan lalu klik Tampilkan Rekap Bulanan untuk melihat statistik.</div>
+                        ) : (
+                            <div className="overflow-x-auto border rounded-2xl">
+                                <table className="w-full text-left text-sm border-collapse">
+                                    <thead className="bg-slate-50 border-b font-bold text-slate-600 uppercase text-[10px]">
+                                        <tr>
+                                            <th className="px-6 py-4">Nama Guru</th>
+                                            <th className="px-6 py-4">ID Guru</th>
+                                            <th className="px-6 py-4">Jabatan</th>
+                                            <th className="px-6 py-4 text-center">Hadir</th>
+                                            <th className="px-6 py-4 text-center">Sakit</th>
+                                            <th className="px-6 py-4 text-center">Izin</th>
+                                            <th className="px-6 py-4 text-center">Alpha</th>
+                                            <th className="px-6 py-4 text-center">Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-100">
+                                        {monthlySummary.map((item: any) => (
+                                            <tr key={item.userId} className="hover:bg-slate-50 transition-colors">
+                                                <td className="px-6 py-4 font-medium text-slate-800">{item.name}</td>
+                                                <td className="px-6 py-4 text-slate-500">{item.idGuru}</td>
+                                                <td className="px-6 py-4 text-slate-500">{item.jabatanStruktural}</td>
+                                                <td className="px-6 py-4 text-center font-semibold text-emerald-700">{item.hadir}</td>
+                                                <td className="px-6 py-4 text-center font-semibold text-amber-700">{item.sakit}</td>
+                                                <td className="px-6 py-4 text-center font-semibold text-blue-700">{item.izin}</td>
+                                                <td className="px-6 py-4 text-center font-semibold text-rose-700">{item.alpa}</td>
+                                                <td className="px-6 py-4 text-center font-semibold text-slate-800">{item.total}</td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                     <div>
                         <h3 className="font-bold text-slate-700 text-base mb-4 flex items-center gap-2">
@@ -139,7 +256,7 @@ export default function RekapAbsensiGuru() {
                             <Download className="w-4 h-4"/>Export Excel (CSV)
                         </button>
                     </div>
-                    <div className="bg-white rounded-2xl border overflow-hidden shadow-sm">
+                    <div className="bg-white rounded-2xl border overflow-x-auto shadow-sm">
                         <table className="w-full text-left text-sm">
                             <thead className="bg-slate-50 border-b font-bold text-slate-600 uppercase text-[10px]">
                                 <tr>

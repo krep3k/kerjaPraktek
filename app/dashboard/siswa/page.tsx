@@ -149,7 +149,7 @@ export default function SiswaPage() {
             <div className="flex justify-between items-center">
                 <div>
                     <h1 className="text-2xl font-bold text-gray-900">Data Siswa</h1>
-                    <p className="text-gray-500 text-sm mt-1">Kelola data siswa di sekolah SDN 02 Serua</p>
+                    <p className="text-gray-500 text-sm mt-1">Kelola data siswa di sekolah SDN 0SERUA 02</p>
                 </div>
                 {isAdmin && (
                     <button onClick={() => handleOpenModal()} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700" title="plus">

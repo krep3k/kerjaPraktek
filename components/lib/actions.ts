@@ -8,13 +8,17 @@ import { AbsensiSiswa } from "./models/AbsensiSiswa";
 import { revalidatePath } from "next/cache";
 import { Attendance } from "./models";
 import { NilaiSiswa } from "./models/NilaiSiswa";
+import { hashEmail } from "./encryption";
 import { GudangData } from "./models";
 import { decrypt } from "./encryption";
+import { UTApi } from "uploadthing/server";
+
+const utapi = new UTApi();
 
 export async function getTeacher() {
     await connectToDatabase();
-    const teacher = await User.find({role: {$ne: "admin"}}).sort({ name: 1 }).lean();
-    return JSON.parse(JSON.stringify(teacher));
+    const teachers = await User.find({ role: { $ne: "admin" } }).sort({ name: 1 });
+    return teachers.map((teacher) => JSON.parse(JSON.stringify(teacher.toObject({ getters: true }))));
 }
 
 export async function saveTeacher(formData: FormData) {
@@ -63,6 +67,9 @@ export async function saveTeacher(formData: FormData) {
             if (password) {
                 data.password = await bcrypt.hash(password, 10);
             }
+            if (data.email) {
+                data.emailHash = hashEmail(data.email);
+            }
             await User.findByIdAndUpdate(id, data);
             if(jabatanBaru !== "Guru Kelas"){
                 await ClassRoom.updateMany(
@@ -73,6 +80,7 @@ export async function saveTeacher(formData: FormData) {
         } else {
             const password = formData.get("password") as string;
             data.password = await bcrypt.hash(password, 10);
+            data.emailHash = hashEmail(data.email);
             await User.create(data);
         }
         revalidatePath("/dashboard/guru");
@@ -147,7 +155,7 @@ export async function addStudents(data: any) {
 export async function getStudents(search = "") {
     await connectToDatabase();
     const query = search ? { name: { $regex: search, $options: "i" } } : {};
-    const students = await Student.find(query).sort({ kelas: 1, name: 1 }).lean();
+    const students = await Student.find(query).sort({ kelas: 1, name: 1 }).lean({ getters: true });
     return JSON.parse(JSON.stringify(students));
 }
 
@@ -168,9 +176,12 @@ export async function saveStudent(formData: FormData) {
         const id = formData.get("id") as string;
         const data = {
             nis: formData.get("nis"),
+            nisn: formData.get("nisn"),
             name: formData.get("name"),
             kelas: Number(formData.get("class") as string),
+            rombel: formData.get("rombel"),
             gender: formData.get("gender"),
+            status: formData.get("status"),
             profilePicture: formData.get("profilePicture")
         };
         if(id) {
@@ -215,7 +226,7 @@ export async function getDashboardStats() {
 export async function getAttendance(userId?: string){
     await connectToDatabase();
     const query = userId ? {userId}:{};
-    const attendance = await Attendance.find(query).populate("userId", "name").sort({date: -1, createdAt: -1}).lean();
+    const attendance = await Attendance.find(query).populate("userId", "name").sort({date: -1, createdAt: -1}).lean({ getters: true });
     return JSON.parse(JSON.stringify(attendance));
 }
 
@@ -297,28 +308,148 @@ export async function saveBulkAbsensi(data: any[], kelas: number, rombel: string
 export async function getGNilaiRecord(kelas: number, rombel: string, semester: string, mapel: string, jenisNilai: string, tanggal: string) {
     try {
         await connectToDatabase();
-        const records = await NilaiSiswa.find({kelas, rombel, semester, mataPelajaran: mapel, jenisNilai, tanggal}).lean();
+        const isEkskul = jenisNilai === "ekskul";
+        const query = {
+            kelas,
+            rombel,
+            semester,
+            mataPelajaran: mapel,
+            jenisNilai: isEkskul ? "ekskul" : jenisNilai,
+            tanggal,
+            isEkskul: isEkskul
+        } as any;
+
+        const records = await NilaiSiswa.find(query).lean();
         return JSON.parse(JSON.stringify(records));
     } catch (error) {
         console.error(error);
-        return[];
+        return [];
     }
 }
 
 export async function saveBulkNilai(data: any[], kelas: number, rombel: string, semester: string, mapel: string, jenisNilai: string, tanggal: string) {
     try {
         await connectToDatabase();
-        for(const item of data) {
+        const isEkskul = jenisNilai === "ekskul";
+
+        for (const item of data) {
+            const updateData: any = {
+                studentId: item.studentId,
+                kelas,
+                rombel,
+                semester,
+                mataPelajaran: mapel,
+                jenisNilai: isEkskul ? "ekskul" : jenisNilai,
+                tanggal,
+                isEkskul
+            };
+
+            if (isEkskul) {
+                updateData.nilaiEkskul = item.nilaiEkskul || "-";
+                updateData.nilai = null;
+            } else {
+                updateData.nilai = Number(item.nilai) || 0;
+                updateData.nilaiEkskul = null;
+            }
+
             await NilaiSiswa.findOneAndUpdate(
-                {studentId: item.studentId, kelas, rombel, semester, mataPelajaran: mapel, jenisNilai, tanggal},
-                {nilai: item.nilai},
-                {upsert: true, new: true}
+                {
+                    studentId: item.studentId,
+                    kelas,
+                    rombel,
+                    semester,
+                    mataPelajaran: mapel,
+                    jenisNilai: isEkskul ? "ekskul" : jenisNilai,
+                    tanggal,
+                    isEkskul
+                },
+                updateData,
+                { upsert: true, new: true }
             );
         }
         revalidatePath("dashboard/nilai");
-        return {success: true};
-    } catch(error: any) {
-        return {error: error.message};
+        return { success: true };
+    } catch (error: any) {
+        return { error: error.message };
+    }
+}
+
+export async function getStudentAttendanceMonthlyRecap(kelas: number, rombel: string, monthYear: string) {
+    try {
+        await connectToDatabase();
+        const records = await AbsensiSiswa.find({
+            kelas,
+            rombel,
+            tanggal: new RegExp(`^${monthYear}`)
+        }).lean();
+        return JSON.parse(JSON.stringify(records));
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
+export async function getStudentNilaiMonthlyRecap(kelas: number, rombel: string, semester: string, mapel: string, jenisNilai: string, monthYear: string) {
+    try {
+        await connectToDatabase();
+        const isEkskul = jenisNilai === "ekskul";
+        const query: any = {
+            kelas,
+            rombel,
+            semester,
+            mataPelajaran: mapel,
+            jenisNilai: isEkskul ? "ekskul" : jenisNilai,
+            isEkskul,
+            tanggal: new RegExp(`^${monthYear}`)
+        };
+        const records = await NilaiSiswa.find(query).lean();
+        return JSON.parse(JSON.stringify(records));
+    } catch (error) {
+        console.error(error);
+        return [];
+    }
+}
+
+export async function getTeacherAttendanceMonthlySummary(monthYear: string) {
+    try {
+        await connectToDatabase();
+        const start = new Date(`${monthYear}-01`);
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + 1);
+
+        const rawData = await Attendance.find({
+            date: { $gte: start, $lt: end }
+        }).populate("userId", "name jabatanStruktural idGuru").lean({ getters: true });
+
+        const summary: Record<string, any> = {};
+        rawData.forEach((item: any) => {
+            const userId = item.userId?._id?.toString();
+            if(!userId) return;
+            if(!summary[userId]) {
+                summary[userId] = {
+                    userId,
+                    name: item.userId.name || "-",
+                    idGuru: item.userId.idGuru || "-",
+                    jabatanStruktural: item.userId.jabatanStruktural || "-",
+                    hadir: 0,
+                    sakit: 0,
+                    izin: 0,
+                    alpa: 0,
+                    total: 0
+                };
+            }
+            const status = String(item.status).toLowerCase();
+            if(status === "hadir") summary[userId].hadir += 1;
+            else if(status === "sakit") summary[userId].sakit += 1;
+            else if(status === "izin") summary[userId].izin += 1;
+            else summary[userId].alpa += 1;
+            summary[userId].total += 1;
+        });
+
+        return JSON.parse(JSON.stringify(Object.values(summary)));
+    } catch (error) {
+        console.error("gagal mengambil rekap absensi guru bulanan:", error);
+        return [];
     }
 }
 
@@ -352,7 +483,7 @@ export async function searchStudents(searchQuery: string) {
                 { name: { $regex: searchQuery, $options: "i" } },
                 { nis: { $regex: searchQuery, $options: "i" } }
             ]
-        }).sort({kelas: 1, rombel: 1, name: 1}).lean();
+        }).sort({kelas: 1, rombel: 1, name: 1}).lean({ getters: true });
         return JSON.parse(JSON.stringify(students))
     } catch (error) {
         console.error(error);
@@ -362,7 +493,8 @@ export async function searchStudents(searchQuery: string) {
 
 export async function getTeacherWithClass() {
     await connectToDatabase();
-    const teachers = await User.find({role: "guru", status: "aktif"}).lean();
+    const teacherDocs = await User.find({ role: "guru", status: "aktif" });
+    const teachers = teacherDocs.map((teacher) => JSON.parse(JSON.stringify(teacher.toObject({ getters: true }))));
     const rooms = await ClassRoom.find().lean();
     return teachers.map((t: any) => {
         const assignedClass = rooms.find((r: any) => r.waliKelas?.toString() === t._id.toString());
@@ -392,6 +524,7 @@ export async function saveTeacherAttendance(attendanceData: any[], date: string)
             {upsert: true},
         );
     }
+    revalidatePath("/dashboard/rekap-absensi-guru")
     return{success: true};
 }
 
@@ -406,8 +539,11 @@ export async function getTeacherAttendanceRecap(startDate: string, endDate: stri
             date: {$gte: start, $lte: end}
         }).populate("userId", "name jabatanStruktural idGuru").sort({date: -1});
         const filteredData = rawData.filter((item: any) => {
-            if(!item.date) return false;
-            const itemDateStr = new Date(item.date).toISOString().split("T")[0];
+            const dateObj = new Date(item.date);
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getDate()).padStart(2, "0");
+            const itemDateStr = `${year}-${month}-${day}`;
             return itemDateStr >= startDate && itemDateStr <= endDate;
         });
         return JSON.parse(JSON.stringify(filteredData));
@@ -423,7 +559,11 @@ export async function getAvailableAttendanceDates() {
         const dates: (string | null)[] = await Attendance.distinct("date");
         const validDates = dates.filter((d): d is string => d != null).map((d) => {
             const dateObj = new Date(d);
-            return isNaN(dateObj.getTime()) ? null : dateObj.toISOString().split("T")[0];
+            if(isNaN(dateObj.getTime())) return null;
+            const year = dateObj.getFullYear();
+            const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+            const day = String(dateObj.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
         }).filter((d): d is string => d != null);
         const uniqueDates = Array.from(new Set(validDates));
         return uniqueDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
@@ -450,6 +590,27 @@ export async function getGudangDataGuru(pemilikId: string) {
 
 export async function deleteDataGudang(id: string) {
     await connectToDatabase();
-    await GudangData.findByIdAndDelete(id);
-    revalidatePath("/dashboard/gudang");
+    try {
+        const fileData = await GudangData.findByIdAndDelete(id).lean();
+        if(fileData) {
+            const decryptedUrl = decrypt(fileData.urlFile as string);
+            const fileKey = decryptedUrl.substring(decryptedUrl.lastIndexOf("/") + 1);
+            if(fileKey) {
+                await utapi.deleteFiles(fileKey);
+                console.log(`File ${fileKey} berhasil dihapus dari UploadThing`);
+            }
+        }
+        await GudangData.findByIdAndDelete(id);
+        revalidatePath("/dashboard/gudang");
+    } catch (error) {
+        console.error("Terjadi kesalahan saat menghapus data: ", error);
+    }
+}
+
+export async function getStorageStats() {
+    await connectToDatabase();
+    const result = await GudangData.aggregate([
+        {$group: {_id: null, totalSize: {$sum: "$ukuranFile"}}}
+    ]);
+    return result.length > 0 ? result[0].totalSize: 0;
 }
