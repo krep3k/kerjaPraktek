@@ -6,18 +6,18 @@ export default function LandingPage() {
   const namaSekolah = "SDN SERUA 02"
 
   return (
-    <div className="min-h-screen bg-[#81CAD6] font-sans selection:bg-[#EDCD44]/20 transition-colors duration-300">
-      <header className="w-full bg-white/90 backdrop-blur-md border-b border-[#F8E6A0] fixed top-0 z-50 transition-colors duration-300">
+    <div className="min-h-screen bg-[#ffffff] font-sans selection:bg-[#EDCD44]/20 transition-colors duration-300">
+      <header className="w-full bg-[#d8d6ff] backdrop-blur-md border-b border-[#a2a0f8] fixed top-0 z-50 transition-colors duration-300">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-[#DC3E26] font-extrabold text-xl tracking-tight">
+          <div className="flex items-center gap-2 text-[#3a5ad8] font-extrabold text-xl tracking-tight">
             <School className="w-8 h-8"/>
             <span>SIAKAD SDN SERUA 02</span>
           </div>
           <nav className="flex flex-wrap items-center gap-2">
-            <Link href="/login" className="hidden sm:block text-sm font-bold text-[#2D2735] hover:text-[#DC3E26] transition-colors px-4 py-2">
+            <Link href="/login" className="hidden rounded-full sm:block text-sm font-bold bg-[#5c92ff] hover:bg-[#1f52b9] text-[#ffffff] hover:text-[#939393] transition-colors px-4 py-2">
               Login
             </Link>
-            <Link href="/login" className="bg-[#EDCD44] text-[#2D2735] text-sm font-bold px-6 py-2.5 rounded-full hover:bg-[#D6C43D] transition-all shadow-lg shadow-[#EDCD44]/20">
+            <Link href="/login" className="bg-[#3458da] text-[#ffffff] text-sm font-bold px-6 py-2.5 rounded-full hover:bg-[#213a95] transition-all shadow-lg shadow-[#EDCD44]/20">
               Get Started
             </Link>
           </nav>
@@ -26,12 +26,12 @@ export default function LandingPage() {
       <main className="pt-32 pb-20 px-6 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center">
           <div className="space-y-8 text-center lg:text-left mt-10 lg:mt-0">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#EDCD44]/15 border border-[#EDCD44]/30 text-[#DC3E26] font-bold text-xs uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3458da]/15 border border-[#3458da]/30 text-[#0d00ff] font-bold text-xs uppercase tracking-wider">
               Portal {namaSekolah}
             </div>
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-[900] text-[#2D2735] leading-[1.1] tracking-tight">
               Era Baru <br />
-              <span className="text-[#DC3E26]">Digitalisasi</span> Sekolah
+              <span className="text-[#2626dc]">Digitalisasi</span> Sekolah
             </h1>
             <p className="text-lg text-[#2D2735] leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
               Tinggalkan cara lama. Kelola administrasi, basis data siswa, dan presensi tenaga pendidik dengan platform yang modern, cepat, dan mudah digunakan
@@ -87,8 +87,8 @@ export default function LandingPage() {
                 {icon: CalendarCheck, title: "Presensi Digital", desc: "Catat kehadiran harian dengan cepat menggunakan antarmuka yang sangat intuitif."},
                 {icon: BookOpen, title: "Export Laporan", desc: "Unduh rekapitulasi data ke format Excel (CSV) hanya dengan satu klik praktis"},
               ].map((feature, idx) => (
-                <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#F8E6A0] hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
-                  <div className="w-16 h-16 bg-[#EDCD44]/10 text-[#DC3E26] rounded-2xl flex items-center justify-center mb-6">
+                <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#a0b3f8] hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                  <div className="w-16 h-16 bg-[#EDCD44]/10 text-[#2626dc] rounded-2xl flex items-center justify-center mb-6">
                     <feature.icon className="w-8 h-8"/>
                   </div>
                   <h3 className="text-xl font-[900] text-[#2D2735] mb-3">
@@ -102,7 +102,7 @@ export default function LandingPage() {
             </div>
           </div>
       </main>
-      <main className="py-8 text-center text-[#6E6B7F] text-sm font-bold border-t border-[#F8E6A0] bg-white transition-colors duration-300">
+      <main className="py-8 text-center text-[#6E6B7F] text-sm font-bold border-t border-[#b3a0f8] bg-white transition-colors duration-300">
         &copy; {new Date().getFullYear()} {namaSekolah}
       </main>
     </div>
