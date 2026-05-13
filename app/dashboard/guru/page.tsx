@@ -109,7 +109,7 @@ export default function DataGuruPage() {
             </div>
             <div className="bg-card border border-border rounded-xl overflow-x-auto shadow-sm w-full">
                 <table className="w-full text-left text-sm text-muted-foreground min-w-200">
-                    <thead className="bg-accent border-b border-border text-accent-foreground uppercase font-semibold">
+                    <thead className="bg-[#353fff] border-b border-border text-white uppercase font-semibold">
                         <tr>
                             <th className="px-6 py-4">Profil</th>
                             <th className="px-6 py-4">Id</th>
@@ -147,17 +147,17 @@ export default function DataGuruPage() {
                                 {userRole === "admin" && (
                                     <td className="px-6 py-4">
                                         <div className="flex gap-2 justify-center">
-                                            <button title="edit" onClick={() => handleEdit(t)} className="p-2 text-muted-foreground hover:text-primary hover:bg-primary/10 rounded-lg transition">
+                                            <button title="edit" onClick={() => handleEdit(t)} className="p-2 text-white hover:text-primary bg-[#223cff] hover:bg-[#5e66ff] rounded-lg transition">
                                                 <Pencil className="wa-4 h-4"></Pencil>
                                             </button>
-                                            <button title="delete" onClick={() => handleDelete(t._id, t.name)} className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition">
+                                            <button title="delete" onClick={() => handleDelete(t._id, t.name)} className="p-2 text-white hover:text-destructive bg-[#ff2929] hover:bg-[#ff4b4b] rounded-lg transition">
                                                 <Trash2 className="h-4 w-4"></Trash2>
                                             </button>
                                         </div>
                                     </td>
                                 )}
                                 <td className="px-6 py-4 flex items-center justify-center gap-3">
-                                    <button onClick={() => setViewingTeacher(t)} className="p-2 text-primary hover:bg-primary/10 rounded-lg transition tooltip" title="Lihat Detail">
+                                    <button onClick={() => setViewingTeacher(t)} className="p-2 text-white bg-[#cd3fd0] hover:bg-[#d999d6] rounded-lg transition tooltip" title="Lihat Detail">
                                         <Eye className="w-5 h-5"></Eye>
                                     </button>
                                 </td>

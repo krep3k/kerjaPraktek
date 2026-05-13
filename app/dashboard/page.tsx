@@ -29,7 +29,7 @@ export default async function DashboardPage() {
                 <span>/</span>
                 <span className="text-[#2D2735]">Ringkasan</span>
             </div>
-            <div className="relative bg-[#EDCD44] rounded-4xl p-8 md:p-10 text-[#2D2735] shadow-2xl shadow-[#EDCD44]/30 overflow-hidden">
+            <div className="relative bg-[#4458ed] rounded-4xl p-8 md:p-10 text-[#fcfcfc] shadow-2xl shadow-[#EDCD44]/30 overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3 blur-3xl"></div>
                 <div className="absolute bottom-0 left-0 w-40 h-40 bg-[#81CAD6]/20 rounded-full translate-y-1/2 -translate-x-1/4 blur-2xl"></div>
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
@@ -37,7 +37,7 @@ export default async function DashboardPage() {
                         <h1 className="text-3xl md:text-4xl font-black mb-3 tracking-tight">
                             Selamat datang, {userName}!
                         </h1>
-                        <p className="text-[#2D2735]/80 text-lg font-medium opacity-90">
+                        <p className="text-[#ffffff] text-lg font-medium opacity-90">
                             Senang Melihat anda kembali, anda login sebagai
                             <span className="ml-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold uppercase border border-white/30">{userRole}</span>
                         </p>
@@ -74,9 +74,9 @@ export default async function DashboardPage() {
 
 function StatCard({title, value, icon: Icon, color, bgColor}: {title: string, value: number, icon: any, color: string, bgColor: string}) {
     return (
-        <div className="bg-white p-6 rounded-4xl border border-[#F8E6A0] shadow-sm flex items-center gap-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
+        <div className="bg-white p-6 rounded-4xl border border-[#a0b5f8] shadow-sm flex items-center gap-5 hover:border-[#cfd1ff] hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group">
             <div className={`${bgColor} ${color} p-5 rounded-2xl transition-transform group-hover:scale-110`}>
-                <Icon className="w-7 h-7 text-[#2D2735]"/>
+                <Icon className="w-7 h-7 text-[#644cff]"/>
             </div>
             <div>
                 <p className="text-xs font-black text-[#6E6B7F] uppercase tracking-widest mb-1">{title}</p>
@@ -88,7 +88,7 @@ function StatCard({title, value, icon: Icon, color, bgColor}: {title: string, va
 
 function NavCard({ href, icon: Icon, title, description }: { href: string; icon: any; title: string; description: string; }) {
     return (
-        <Link href={href} className="group block rounded-4xl border border-[#F8E6A0] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#EDCD44]/50">
+        <Link href={href} className="group block rounded-4xl border border-[#a3a0f8] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-[#b9c5fa]">
             <div className="flex items-center justify-between gap-4 mb-4">
                 <div className="text-[#2D2735] font-bold text-lg">{title}</div>
                 <span className="inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-[#81CAD6]/10 text-[#81CAD6] transition-transform group-hover:scale-110">

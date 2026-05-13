@@ -29,7 +29,7 @@ export default function LandingPage() {
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#3458da]/15 border border-[#3458da]/30 text-[#0d00ff] font-bold text-xs uppercase tracking-wider">
               Portal {namaSekolah}
             </div>
-            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-[900] text-[#2D2735] leading-[1.1] tracking-tight">
+            <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-[#2D2735] leading-[1.1] tracking-tight">
               Era Baru <br />
               <span className="text-[#2626dc]">Digitalisasi</span> Sekolah
             </h1>
@@ -42,12 +42,12 @@ export default function LandingPage() {
               </Link>
             </div>
           </div>
-          <div className="relative flex justify-center lg:justify-end hidden md:flex">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#DC3E26]/15 rounded-full blur-3xl -z-10"></div>
+          <div className="relative flex justify-center lg:justify-end md:flex">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-100 h-100 bg-[#DC3E26]/15 rounded-full blur-3xl -z-10"></div>
             <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-[#F8E6A0] overflow-hidden transform lg:rotate-2 hover:rotate-0 transition-transform duration-500">
-              <div className="h-12 border-b border-[#F8E6A0] bg-[#EDCD44]/15 flex items-center px-5 gap-2">
-                <div className="w-3 h-3 rounded-full bg-[#DC3E26]"></div>
-                <div className="w-3 h-3 rounded-full bg-[#EDCD44]"></div>
+              <div className="h-12 border-b border-[#a0b9f8] bg-[#445bed]/15 flex items-center px-5 gap-2">
+                <div className="w-3 h-3 rounded-full bg-[#2632dc]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#444ced]"></div>
                 <div className="w-3 h-3 rounded-full bg-[#81CAD6]"></div>
               </div>
               <div className="p-6 space-y-5 bg-white">
@@ -76,7 +76,7 @@ export default function LandingPage() {
         </div>
         <div className="mt-32 pt-20 border-t border-[#F8E6A0]/60">
             <div className="text-center mb-16">
-              <h2 className="text-3xl lg:text-4xl font-[900] text-[#2D2735] mb-4">Fitur Unggulan</h2>
+              <h2 className="text-3xl lg:text-4xl font-black text-[#2D2735] mb-4">Fitur Unggulan</h2>
               <p className="text-[#6E6B7F] max-w-2xl mx-auto font-medium">
                 Platform kami dilengkapi dengan berbagai fitur yang dirancang untuk meningkatkan efisiensi dan kualitas pengelolaan sekolah.
               </p>
@@ -87,11 +87,11 @@ export default function LandingPage() {
                 {icon: CalendarCheck, title: "Presensi Digital", desc: "Catat kehadiran harian dengan cepat menggunakan antarmuka yang sangat intuitif."},
                 {icon: BookOpen, title: "Export Laporan", desc: "Unduh rekapitulasi data ke format Excel (CSV) hanya dengan satu klik praktis"},
               ].map((feature, idx) => (
-                <div key={idx} className="bg-white p-8 rounded-[2rem] shadow-sm border border-[#a0b3f8] hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
+                <div key={idx} className="bg-white p-8 rounded-4xl shadow-sm border border-[#a0b3f8] hover:shadow-xl hover:-translate-y-2 transition-all duration-300">
                   <div className="w-16 h-16 bg-[#EDCD44]/10 text-[#2626dc] rounded-2xl flex items-center justify-center mb-6">
                     <feature.icon className="w-8 h-8"/>
                   </div>
-                  <h3 className="text-xl font-[900] text-[#2D2735] mb-3">
+                  <h3 className="text-xl font-black text-[#2D2735] mb-3">
                     {feature.title}
                   </h3>
                   <p className="text-[#6E6B7F] leading-relaxed text-sm font-medium">

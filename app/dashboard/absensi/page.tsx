@@ -108,16 +108,31 @@ export default function AbsensiPage() {
                                 <td className="p-3">{idx + 1}</td>
                                 <td className="p-3 font-medium">{s.name}</td>
                                 <td className="p-3 text-center">
-                                    <select title="absensi" name="" id="" value={absensiData[s._id]?.status || "Hadir"} onChange={e => handleAbsenChange(s._id, "status", e.target.value)} className={`border px-2.5 py-1.5 rounded-md font-semibold text-xs uppercase ${ absensiData[s._id]?.status === 'Hadir' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : absensiData[s._id]?.status === 'Sakit' ? 'bg-amber-100 text-amber-700 border-amber-200' : absensiData[s._id]?.status === 'Izin' ? 'bg-blue-100 text-blue-700 border-blue-200' : 'bg-rose-100 text-rose-700 border-rose-200'}`}>
-                                        <option value="Hadir">Hadir</option>
-                                        <option value="Sakit">Sakit</option>
-                                        <option value="Izin">Izin</option>
-                                        <option value="Alpha">Alpha</option>
-                                    </select>
+                                    <div className="flex justify-center gap-1.5">
+                                        {[
+                                            { id: "Hadir", label: "Hadir", activeClass: "bg-emerald-500 text-white border-emerald-600 shadow-sm" },
+                                            { id: "Izin", label: "Izin", activeClass: "bg-blue-500 text-white border-blue-600 shadow-sm" },
+                                            { id: "Sakit", label: "Sakit", activeClass: "bg-amber-500 text-white border-amber-600 shadow-sm" },
+                                            { id: "Alpha", label: "Alpha", activeClass: "bg-rose-500 text-white border-rose-600 shadow-sm" },
+                                        ].map(st => {
+                                            const isActive = absensiData[s._id]?.status === st.id;
+                                            return (
+                                                <button key={st.id} onClick={() => {
+                                                    const newKeterangan = st.id === "Hadir" ? "" : absensiData[s._id]?.keterangan;
+                                                    handleAbsenChange(s._id, "status", st.id);
+                                                    if(st.id === "Hadir") {
+                                                        handleAbsenChange(s._id, "keterangan", "");
+                                                    }
+                                                }} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border ${isActive ? st.activeClass : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}>
+                                                    {st.label}
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
                                 </td>
                                 <td className="p-3">
                                     <label htmlFor="ket"></label>
-                                    <input id="ket" type="text" placeholder="Isi alasan jika tidak hadir..." value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir"} className="w-full border p-1 rounded-md disabled:bg-gray-100 disabled:placeholder-transparent" />
+                                    <input id="ket" type="text" placeholder={absensiData[s._id]?.status === "Hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir"} className={`w-full border rounded-lg outline-none text-xs p-2.5 transition-colors ${absensiData[s._id]?.status === "Hadir" ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
                                 </td>
                             </tr>
                         ))}

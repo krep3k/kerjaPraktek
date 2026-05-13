@@ -28,7 +28,7 @@ export default function DashboardWrapper({
                 <div className={`p-6 border-b border-[#F8E6A0] flex items-center h-20 shrink-0 ${isCollapsed ? "justify-center" : "justify-between"}`}>
                     {!isCollapsed && (
                         <div className="flex items-center gap-3">
-                            <div className="bg-[#EDCD44] p-2 rounded-xl">
+                            <div className="bg-[#4452ed] p-2 rounded-xl">
                                 <div className="w-5 h-5 bg-white rounded-sm"></div>
                             </div>
                             <span className="font-black text-xl tracking-tighter text-[#2D2735] uppercase">SDN SERUA 02</span>

@@ -367,7 +367,7 @@ export default function RekapDataPage() {
             ) : (
                 <div className="overflow-x-auto border rounded-lg">
                     <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-gray-100 border-b">
+                        <thead className="bg-[#1d15ff] border-b text-white">
                             <tr>
                                 <th className="p-3 w-16 text-center">No</th>
                                 <th className="p-3 w-32">NIS</th>

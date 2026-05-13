@@ -212,7 +212,7 @@ export default function SiswaPage() {
             <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
                 {loading ? <div className="p-10 text-center">Memuat data...</div> : (
                     <table className="w-full text-left text-sm text-gray-600 min-w-200 whitespace-nowrap">
-                        <thead className="bg-gray-50 border-b border-gray-200 text-gray-700 uppercase font-semibold">
+                        <thead className="bg-[#9eb8ff] border-b border-gray-200 text-gray-700 uppercase font-semibold">
                             <tr>
                                 <th className="px-6 py-4 w-16">No</th>
                                 <th className="px-6 py-4">NIS</th>
