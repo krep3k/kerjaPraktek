@@ -73,7 +73,7 @@ export default function AbsensiGuruPage() {
             </div>
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
                 <table className="w-full text-left text-sm">
-                    <thead className="bg-slate-50 border-b text-slate-600 uppercase font-bold text-xs">
+                    <thead className="bg-[#271cff] border-b text-white uppercase font-bold text-xs">
                         <tr>
                             <th className="px-6 py-4">ID Guru</th>
                             <th className="px-6 py-4">Nama Guru</th>

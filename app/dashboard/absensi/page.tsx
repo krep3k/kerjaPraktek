@@ -94,7 +94,7 @@ export default function AbsensiPage() {
             </div>
             {loading ? <div className="text-center p-10">Memuat data...</div> : (
                 <table className="w-full text-left text-sm border-collapse">
-                    <thead className="bg-gray-100 border-b">
+                    <thead className="bg-[#2c25ff] border-b text-white">
                         <tr>
                             <th className="p-3 w-16">No</th>
                             <th className="p-3">Nama Siswa</th>
