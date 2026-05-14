@@ -6,6 +6,7 @@ import { getAbsensiRecord, saveBulkAbsensi, getStudentsFiltered } from "@/compon
 import { Save } from "lucide-react";
 import { getRombelByKelas } from "@/components/lib/constants";
 import { getMataPelajaranByKelas } from "@/components/lib/constants";
+import { motion } from "motion/react";
 
 export default function AbsensiPage() {
     const [kelas, setKelas] = useState<number>(1);
@@ -93,6 +94,17 @@ export default function AbsensiPage() {
             
             </div>
             {loading ? <div className="text-center p-10">Memuat data...</div> : (
+                <motion.div initial={{
+                    opacity: 0,
+                    y: 10,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    transition={{
+                        duration: 0.25,
+                    }}>
                 <table className="w-full text-left text-sm border-collapse">
                     <thead className="bg-[#2c25ff] border-b text-white">
                         <tr>
@@ -138,6 +150,7 @@ export default function AbsensiPage() {
                         ))}
                     </tbody>
                 </table>
+                </motion.div>
             )}
         </div>
     );

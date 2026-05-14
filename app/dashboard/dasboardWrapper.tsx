@@ -23,7 +23,10 @@ export default function DashboardWrapper({
 
     return (
         <div className="flex h-screen w-full bg-[#F6F4F9] overflow-hidden transition-colors duration-300">
-            <div className="fixed inset-0 bg-[#2D2735]/10 z-40 lg:hidden backdrop-blur-sm transition-opacity" onClick={() => setIsSidebarOpen(false)}></div>
+            <div
+                className={`fixed inset-0 bg-[#2D2735]/10 z-40 lg:hidden backdrop-blur-sm transition-opacity ${isSidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+                onClick={() => setIsSidebarOpen(false)}
+            ></div>
             <aside className={`fixed inset-y-0 left-0 z-50 bg-white border-r border-[#ada0f8] transition-all duration-300 ease-in-out flex flex-col h-screen ${isSidebarOpen ? "translate-x-0 w-72 shadow-2xl" : "-translate-x-full w-72 shadow-none"} lg:relative lg:translate-x-0 lg:shadow-none ${isCollapsed ? "lg:w-20" : "lg:w-72"}`}>
                 <div className={`p-6 border-b border-[#ffffff] flex items-center h-20 shrink-0 ${isCollapsed ? "justify-center" : "justify-between"}`}>
                     {!isCollapsed && (

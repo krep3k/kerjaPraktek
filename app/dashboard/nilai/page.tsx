@@ -6,6 +6,7 @@ import { getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/component
 import { getMataPelajaranByKelas } from "@/components/lib/constants";
 import { Save } from "lucide-react";
 import { getRombelByKelas } from "@/components/lib/constants";
+import { motion } from "motion/react";
 
 export default function RekapNilaiPage() {
     const [kelas, setKelas] = useState<number>(1);
@@ -164,6 +165,17 @@ export default function RekapNilaiPage() {
             </div>
 
             {loading ? <div className="text-center p-10">Memuat data...</div> : (
+                <motion.div initial={{
+                    opacity: 0,
+                    y: 10,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    transition={{
+                        duration: 0.25,
+                    }}>
                 <table className="w-full text-left text-sm border-collapse rounded-xl mt-4">
                     <thead className="bg-[#2522ff] text-white border-b">
                         <tr>
@@ -210,6 +222,7 @@ export default function RekapNilaiPage() {
                         ))}
                     </tbody>
                 </table>
+                </motion.div>
             )}
         </div>
     );

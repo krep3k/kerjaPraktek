@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas } from "@/components/lib/actions";
 import { PlusCircle, Edit, Trash2, X, Search, UserIcon } from "lucide-react";
+import { motion } from "motion/react";
 
 export default function SiswaPage() {
     const {data: session} = useSession();
@@ -211,6 +212,17 @@ export default function SiswaPage() {
             </div>
             <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
                 {loading ? <div className="p-10 text-center">Memuat data...</div> : (
+                    <motion.div initial={{
+                        opacity: 0,
+                        y: 10,
+                        }}
+                        animate={{
+                            opacity: 1,
+                            y: 0,
+                        }}
+                        transition={{
+                            duration: 0.25,
+                        }}>
                     <table className="w-full text-left text-sm text-gray-600 min-w-200 whitespace-nowrap">
                         <thead className="bg-[#9eb8ff] border-b border-gray-200 text-gray-700 uppercase font-semibold">
                             <tr>
@@ -252,6 +264,7 @@ export default function SiswaPage() {
                             ))}
                         </tbody>
                     </table>
+                    </motion.div>
                 )}
             </div>
             {showModal && (

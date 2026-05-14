@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { getStudentsFiltered, getAbsensiRecord, getGNilaiRecord, getStudentAttendanceMonthlyRecap, getStudentNilaiMonthlyRecap } from "@/components/lib/actions";
 import { Download, CheckSquare, BookOpen } from "lucide-react";
 import { getMataPelajaranByKelas, getRombelByKelas } from "@/components/lib/constants";
+import { motion } from "motion/react";
 
 interface Student {
     _id: string;
@@ -366,6 +367,17 @@ export default function RekapDataPage() {
                 <div className="text-center p-10 text-gray-500 font-medium animate-pulse">Memuat data...</div>
             ) : (
                 <div className="overflow-x-auto border rounded-lg">
+                    <motion.div initial={{
+                        opacity: 0,
+                        y: 10,
+                    }}
+                    animate={{
+                        opacity: 1,
+                        y: 0,
+                    }}
+                    transition={{
+                        duration: 0.25,
+                    }}>
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-[#1d15ff] border-b text-white">
                             <tr>
@@ -417,21 +429,7 @@ export default function RekapDataPage() {
                                         )
                                     ) : (
                                         <td className="p-3 text-center">
-                                            <span className={`px-2.5 py-1 rounded-md font-bold text-xs uppercase ${
-                                                row.nilai === 'Belum Diisi' 
-                                                  ? 'bg-gray-100 text-gray-500' 
-                                                  : isEkskulMapel
-                                                    ? row.nilai === 'A' 
-                                                      ? 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                                      : row.nilai === 'B'
-                                                        ? 'bg-blue-100 text-blue-700 border border-blue-200'
-                                                        : 'bg-amber-100 text-amber-700 border border-amber-200'
-                                                    : parseInt(row.nilai as string) < 50
-                                                      ? 'bg-rose-100 text-rose-700 border border-rose-200'
-                                                      : parseInt(row.nilai as string) < 80
-                                                        ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                                                        : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                                            }`}>
+                                            <span className={`px-2.5 py-1 rounded-md font-bold text-xs uppercase ${row.nilai === 'Belum Diisi' ? 'bg-gray-100 text-gray-500' : isEkskulMapel ? row.nilai === 'A' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : row.nilai === 'B' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-amber-100 text-amber-700 border border-amber-200' : parseInt(row.nilai as string) < 50 ? 'bg-rose-100 text-rose-700 border border-rose-200' : parseInt(row.nilai as string) < 80 ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>
                                                 {row.nilai}
                                             </span>
                                         </td>
@@ -444,6 +442,7 @@ export default function RekapDataPage() {
                             )}
                         </tbody>
                     </table>
+                    </motion.div>
                 </div>
             )}
         </div>
