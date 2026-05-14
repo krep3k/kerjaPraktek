@@ -19,6 +19,7 @@ const inter = Inter({subsets: ["latin"]});
 export const metadata: Metadata = {
   title: "Sistem Infrmasi Manajemen SDN SERUA 02",
   description: "Created by krep3k and songpais",
+  icons: {icon: "/favicon.png"},
 };
 
 export default function RootLayout({
