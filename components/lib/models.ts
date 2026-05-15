@@ -43,7 +43,7 @@ const StudentSchema = new Schema({
 }, {timestamps: true, toJSON: {getters: true}, toObject: {getters: true}});
 
 const AttendanceSchema = new Schema({
-    userId: {type: Schema.Types.ObjectId, ref: "User", required: true, set: encrypt, get: decrypt},
+    userId: {type: Schema.Types.ObjectId, ref: "User", required: true},
     date: {type: Date, required: true},
     status: {type: String, enum: ["hadir", "izin", "sakit", "alpa"], required: true},
     notes: {type: String, default: ""},
@@ -97,6 +97,9 @@ if(mongoose.models.User) {
 }
 if(mongoose.models.ClassRoom) {
     delete mongoose.models.ClassRoom;
+}
+if(mongoose.models.Attendance) {
+    delete mongoose.models.Attendance;
 }
 
 export const User = models.User || model("User", UserSchema);

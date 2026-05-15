@@ -298,7 +298,7 @@ export default function DataGuruPage() {
                                                         <button title="previewImage" type="button" onClick={() => setPreviewImage(null)} className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 text-slate-900 shadow-sm hover:bg-white transition">
                                                             <X className="w-5 h-5" />
                                                         </button>
-                                                        <img src={previewImage} alt="Preview Foto Guru" className="w-full max-h-[80vh] object-contain bg-black" />
+                                                        <Image src={previewImage} alt="Preview Foto Guru" className="w-full max-h-[80vh] object-contain bg-black" />
                                                     </motion.div>
                                                 </motion.div>
                                             )}
@@ -331,16 +331,27 @@ export default function DataGuruPage() {
                                     <div className="absolute left-0 top-0 w-1.5 h-full bg-primary"></div>
                                     <h3 className="font-bold text-primary border-b border-accent pb-2 mb-4 flex items-center gap-2">Profile</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="md:col-span-2 flex items-center gap-4 mb-2">
-                                            {photoBase64 ? (
-                                                <Image src={photoBase64} alt="Preview" width={64} height={64} className="w-16 h-16 rounded-full object-cover border-2 border-accent shadow-sm" unoptimized />
-                                            ) : (
-                                                <div className="w-16 h-16 rounded-full bg-card flex items-center justify-center border border-dashed border-border">
-                                                    <UserIcon className="w-6 h-6 text-muted-foreground"/>
+                                        <div className="md:col-span-2 bg-slate-50 p-4 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 mb-2">
+                                            <div className="flex-none">
+                                                {photoBase64 ? (
+                                                    <Image src={photoBase64} alt="Preview" width={80} height={80} className="w-20 h-20 rounded-full object-cover border-2 border-blue-500 shadow-sm" unoptimized />
+                                                ) : (
+                                                    <div className="w-20 h-20 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center border border-dashed border-blue-200">
+                                                        <UserIcon className="w-8 h-8"/>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-slate-900">Foto Profil Guru</p>
+                                                <p className="text-xs text-slate-500 mb-3">Unggah foto JPG/PNG agar mudah dikenali. Maks. 2MB.</p>
+                                                <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-2">
+                                                    <label htmlFor="pp" className="inline-flex items-center justify-center rounded-xl border border-blue-300 bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 transition-colors cursor-pointer">
+                                                        Pilih Foto
+                                                    </label>
+                                                    {photoBase64 && <span className="text-xs text-slate-500">Foto sudah dipilih</span>}
                                                 </div>
-                                            )}
-                                            <label htmlFor="pp"></label>
-                                            <input id="pp" name="pp" title="pp" type="file" accept="image/*" onChange={handleFileChange} className="text-sm text-muted-foreground file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-accent file:text-accent-foreground hover:file:bg-accent/70 cursor-pointer" />
+                                                <input id="pp" name="pp" title="pp" type="file" accept="image/*" onChange={handleFileChange} className="sr-only" />
+                                            </div>
                                         </div>
                                         <div>
                                             <label htmlFor="name" className="block text-xs font-bold text-muted-foreground uppercase mb-1">Nama Lengkap</label>

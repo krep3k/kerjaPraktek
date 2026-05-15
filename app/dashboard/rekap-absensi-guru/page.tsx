@@ -34,11 +34,9 @@ export default function RekapAbsensiGuru() {
         { value: "12", label: "Desember" }
     ];
 
-    const yearOptions = [
-        new Date().getFullYear() - 1,
-        new Date().getFullYear(),
-        new Date().getFullYear() + 1
-    ];
+    const yearOptions = Array.from({ length: 11 }, (_, i) => {
+        return new Date().getFullYear() - 5 + i;
+    });
 
     useEffect(() => {
         setIsMounted(true);

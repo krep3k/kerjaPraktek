@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 import { User, Grade, ClassRoom } from "./models";
 import { connectToDatabase } from "./db";
 import { Student } from "./models/Students";
@@ -155,7 +156,7 @@ export async function addStudents(data: any) {
 export async function getStudents(search = "") {
     await connectToDatabase();
     const query = search ? { name: { $regex: search, $options: "i" } } : {};
-    const students = await Student.find(query).sort({ kelas: 1, name: 1 }).lean({ getters: true });
+    const students = await Student.find(query).sort({ kelas: 1, name: 1 });
     return JSON.parse(JSON.stringify(students));
 }
 
@@ -226,7 +227,7 @@ export async function getDashboardStats() {
 export async function getAttendance(userId?: string){
     await connectToDatabase();
     const query = userId ? {userId}:{};
-    const attendance = await Attendance.find(query).populate("userId", "name").sort({date: -1, createdAt: -1}).lean({ getters: true });
+    const attendance = await Attendance.find(query).populate("userId", "name").sort({date: -1, createdAt: -1});
     return JSON.parse(JSON.stringify(attendance));
 }
 
@@ -419,7 +420,7 @@ export async function getTeacherAttendanceMonthlySummary(monthYear: string) {
 
         const rawData = await Attendance.find({
             date: { $gte: start, $lt: end }
-        }).populate("userId", "name jabatanStruktural idGuru").lean({ getters: true });
+        }).populate("userId", "name jabatanStruktural idGuru");
 
         const summary: Record<string, any> = {};
         rawData.forEach((item: any) => {
@@ -518,10 +519,13 @@ export async function saveTeacherAttendance(attendanceData: any[], date: string)
     const targetDate = new Date(date);
     targetDate.setHours(0, 0, 0, 0);
     for(const item of attendanceData) {
+        const userId = mongoose.Types.ObjectId.isValid(item.userId)
+            ? new mongoose.Types.ObjectId(item.userId)
+            : item.userId;
         await Attendance.findOneAndUpdate(
-            {userId: item.userId, date: targetDate},
-            {status: item.status, notes: item.notes},
-            {upsert: true},
+            {userId, date: targetDate},
+            {userId, date: targetDate, status: item.status, notes: item.notes},
+            {upsert: true, new: true, setDefaultsOnInsert: true},
         );
     }
     revalidatePath("/dashboard/rekap-absensi-guru")

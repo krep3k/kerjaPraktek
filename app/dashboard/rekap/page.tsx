@@ -67,11 +67,9 @@ export default function RekapDataPage() {
         { value: "11", label: "November" },
         { value: "12", label: "Desember" }
     ];
-    const yearOptions = [
-        new Date().getFullYear() - 1,
-        new Date().getFullYear(),
-        new Date().getFullYear() + 1
-    ];
+    const yearOptions = Array.from({ length: 11 }, (_, i) => {
+        return new Date().getFullYear() - 5 + i;
+    });
 
     useEffect(() => {
         const loadData = async () => {
@@ -307,9 +305,7 @@ export default function RekapDataPage() {
                                 id="year"
                                 title="Tahun"
                                 value={monthYear.slice(0, 4)}
-                                onChange={e => setMonthYear(`${e.target.value}-${monthYear.slice(5)}`)}
-                                className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium"
-                            >
+                                onChange={e => setMonthYear(`${e.target.value}-${monthYear.slice(5)}`)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
                                 {yearOptions.map(year => (
                                     <option key={year} value={year}>{year}</option>
                                 ))}

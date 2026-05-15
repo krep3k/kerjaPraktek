@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/components/lib/auth";
-import DashboardWrapper from "./dasboardWrapper";
+import DashboardWrapper from "../../components/dasboardWrapper";
 import { redirect } from "next/navigation";
 
 export default async function DashbardLayout({children}: {children: React.ReactNode}) {

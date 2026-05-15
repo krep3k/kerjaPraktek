@@ -61,40 +61,42 @@ export default function AbsensiGuruPage() {
 
     return (
         <div className="p-6">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold text-slate-800">Absensi Guru</h1>
-                <div className="flex items-center gap-3">
-                    <label htmlFor="date">Tanggal</label>
-                    <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} className="border p-2 rounded-xl text-sm font-bold text-blue-600 outline-none focus:ring-2 focus:ring-blue-500" />
-                    <button onClick={handleSave} disabled={loading} className="bg-blue-600 text-white px-5 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-blue-700 transition-all">
+                <div className="flex flex-col gap-3 w-full sm:w-auto sm:flex-row sm:items-center">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                        <label htmlFor="date" className="text-sm font-semibold text-slate-700 min-w-20">Tanggal</label>
+                        <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} className="w-full sm:w-auto border px-3 py-2 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+                    <button onClick={handleSave} disabled={loading} className="w-full sm:w-auto bg-blue-600 text-white px-5 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-70">
                         <Save className="w-4 h-4"/>{loading ? "Menyimpan..." : "Simpan Absensi"}
                     </button>
                 </div>
             </div>
             <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-x-auto">
-                <table className="w-full text-left text-sm">
+                <table className="min-w-160 w-full text-left text-sm">
                     <thead className="bg-[#271cff] border-b text-white uppercase font-bold text-xs">
                         <tr>
-                            <th className="px-6 py-4">ID Guru</th>
-                            <th className="px-6 py-4">Nama Guru</th>
-                            <th className="px-6 py-4 text-center">Status Kehadiran</th>
-                            <th className="px-6 py-4">Keterangan</th>
+                            <th className="px-3 py-3 sm:px-6 sm:py-4">ID Guru</th>
+                            <th className="px-3 py-3 sm:px-6 sm:py-4">Nama Guru</th>
+                            <th className="px-3 py-3 sm:px-6 sm:py-4 text-center">Status Kehadiran</th>
+                            <th className="px-3 py-3 sm:px-6 sm:py-4">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                         {teachers?.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-10 text-center text-slate-400 font-medium">
+                                <td colSpan={4} className="px-3 py-10 sm:px-6 text-center text-slate-400 font-medium">
                                     Tidak ada guru yang ditemukan.
                                 </td>
                             </tr>
                         ) : (
                             teachers?.map(t => (
                             <tr key={t._id} className="hover:bg-slate-50">
-                                <td className="px-6 py-4 font-mono text-slate-500">{t.idGuru || ""}</td>
-                                <td className="px-6 py-4 font-bold text-slate-800">{t.name}</td>
-                                <td className="px-6 py-4">
-                                    <div className="flex justify-center gap-1.5">
+                                <td className="px-3 py-4 sm:px-6 sm:py-4 font-mono text-slate-500">{t.idGuru || ""}</td>
+                                <td className="px-3 py-4 sm:px-6 sm:py-4 font-bold text-slate-800">{t.name}</td>
+                                <td className="px-3 py-4 sm:px-6 sm:py-4">
+                                    <div className="flex flex-wrap justify-center gap-2">
                                         {[
                                             { id: "hadir", label: "Hadir", activeClass: "bg-emerald-500 text-white border-emerald-600 shadow-sm" },
                                             { id: "izin", label: "Izin", activeClass: "bg-blue-500 text-white border-blue-600 shadow-sm" },
@@ -113,7 +115,7 @@ export default function AbsensiGuruPage() {
                                         })}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4">
+                                <td className="px-3 py-4 sm:px-6 sm:py-4">
                                     <label htmlFor="notes"></label>
                                     <input type="text" id="notes" name="notes" placeholder={attendance[t._id]?.status === "hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={attendance[t._id]?.notes || ""} onChange={e => setAttendance({...attendance, [t._id]: {...attendance[t._id], notes: e.target.value}})} disabled={attendance[t._id]?.status === "hadir"} className={`w-full border rounded-lg outline-none text-xs p-2.5 transition-colors ${attendance[t._id]?.status === "hadir" ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
                                 </td>

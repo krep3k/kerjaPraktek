@@ -35,7 +35,24 @@ export default function AbsensiPage() {
     }, [kelas, rombel, tanggal]);
 
     const handleAbsenChange = (id: string, field: string, value: string) => {
-        setAbsensiData({...absensiData, [id]: {...absensiData[id], [field]: value}});
+        setAbsensiData((prev: any) => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                [field]: value,
+            }
+        }));
+    }
+
+    const handleStatusSelect = (id: string, status: string) => {
+        setAbsensiData((prev: any) => ({
+            ...prev,
+            [id]: {
+                ...prev[id],
+                status,
+                keterangan: status === "Hadir" ? "" : prev[id]?.keterangan || "",
+            }
+        }));
     }
 
     const handleKelasChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -105,51 +122,47 @@ export default function AbsensiPage() {
                     transition={{
                         duration: 0.25,
                     }}>
-                <table className="w-full text-left text-sm border-collapse">
-                    <thead className="bg-[#2c25ff] border-b text-white">
-                        <tr>
-                            <th className="p-3 w-16">No</th>
-                            <th className="p-3">Nama Siswa</th>
-                            <th className="p-3 text-center">Status</th>
-                            <th className="p-3">Keterangan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {students.map((s, idx) => (
-                            <tr key={s._id} className="border-b hover:bg-gray-50">
-                                <td className="p-3">{idx + 1}</td>
-                                <td className="p-3 font-medium">{s.name}</td>
-                                <td className="p-3 text-center">
-                                    <div className="flex justify-center gap-1.5">
-                                        {[
-                                            { id: "Hadir", label: "Hadir", activeClass: "bg-emerald-500 text-white border-emerald-600 shadow-sm" },
-                                            { id: "Izin", label: "Izin", activeClass: "bg-blue-500 text-white border-blue-600 shadow-sm" },
-                                            { id: "Sakit", label: "Sakit", activeClass: "bg-amber-500 text-white border-amber-600 shadow-sm" },
-                                            { id: "Alpha", label: "Alpha", activeClass: "bg-rose-500 text-white border-rose-600 shadow-sm" },
-                                        ].map(st => {
-                                            const isActive = absensiData[s._id]?.status === st.id;
-                                            return (
-                                                <button key={st.id} onClick={() => {
-                                                    const newKeterangan = st.id === "Hadir" ? "" : absensiData[s._id]?.keterangan;
-                                                    handleAbsenChange(s._id, "status", st.id);
-                                                    if(st.id === "Hadir") {
-                                                        handleAbsenChange(s._id, "keterangan", "");
-                                                    }
-                                                }} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border ${isActive ? st.activeClass : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}>
-                                                    {st.label}
-                                                </button>
-                                            )
-                                        })}
-                                    </div>
-                                </td>
-                                <td className="p-3">
-                                    <label htmlFor="ket"></label>
-                                    <input id="ket" type="text" placeholder={absensiData[s._id]?.status === "Hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir"} className={`w-full border rounded-lg outline-none text-xs p-2.5 transition-colors ${absensiData[s._id]?.status === "Hadir" ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
-                                </td>
+                <div className="overflow-x-auto rounded-2xl border border-slate-200">
+                    <table className="min-w-170 w-full table-auto text-left text-sm border-collapse">
+                        <thead className="bg-[#2c25ff] border-b text-white">
+                            <tr>
+                                <th className="p-3 w-16">No</th>
+                                <th className="p-3">Nama Siswa</th>
+                                <th className="p-3 text-center">Status</th>
+                                <th className="p-3">Keterangan</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {students.map((s, idx) => (
+                                <tr key={s._id} className="border-b hover:bg-gray-50 last:border-b-0">
+                                    <td className="p-3 align-top">{idx + 1}</td>
+                                    <td className="p-3 font-medium align-top max-w-55 wrap-break-word">{s.name}</td>
+                                    <td className="p-3 text-center align-top">
+                                        <div className="flex flex-wrap justify-center gap-2">
+                                            {[
+                                                { id: "Hadir", label: "Hadir", activeClass: "bg-emerald-500 text-white border-emerald-600 shadow-sm" },
+                                                { id: "Izin", label: "Izin", activeClass: "bg-blue-500 text-white border-blue-600 shadow-sm" },
+                                                { id: "Sakit", label: "Sakit", activeClass: "bg-amber-500 text-white border-amber-600 shadow-sm" },
+                                                { id: "Alpha", label: "Alpha", activeClass: "bg-rose-500 text-white border-rose-600 shadow-sm" },
+                                            ].map(st => {
+                                                const isActive = absensiData[s._id]?.status === st.id;
+                                                return (
+                                                    <button key={st.id} type="button" onClick={() => handleStatusSelect(s._id, st.id)} className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all border ${isActive ? st.activeClass : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}>
+                                                        {st.label}
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </td>
+                                    <td className="p-3 align-top max-w-65">
+                                        <label htmlFor={`ket-${s._id}`} className="sr-only">Keterangan</label>
+                                        <input id={`ket-${s._id}`} type="text" placeholder={absensiData[s._id]?.status === "Hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir"} className={`w-full min-w-0 border rounded-lg outline-none text-xs p-2.5 transition-colors ${absensiData[s._id]?.status === "Hadir" ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
                 </motion.div>
             )}
         </div>
