@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { getTeacher, saveTeacher, deleteTeacher } from "@/components/lib/actions";
 import { User as UserIcon, Pencil, Trash2, X, PlusCircle, Eye } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 
 interface Teacher {
     _id: string;
@@ -102,7 +103,7 @@ export default function DataGuruPage() {
                     <p className="text-muted-foreground text-sm mt-1">Kelola akun dan profile guru yang terhormat</p>
                 </div>
                 {userRole === "admin" && (
-                    <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-primary text-primary-foreground font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 ease-in-out active:scale-95">
+                    <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-[#0f2bff] text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:bg-[#1518c7] hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 ease-in-out active:scale-95">
                         <PlusCircle color="currentColor" size={22} strokeWidth={2.5}/>
                     </button>
                 )}
@@ -136,11 +137,11 @@ export default function DataGuruPage() {
                                 <td className="px-6 py-4 text-foreground">{t.idGuru ? t.idGuru : "-"}</td>
                                 <td className="px-6 py-4 font-medium text-foreground">{t.name}</td>
                                 <td className="px-6 py-4">
-                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${t.status === "aktif" ? "bg-success/10 text-success border-success/30" : "bg-destructive/10 text-destructive border-destructive/30"}`}>
+                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border ${t.status === "aktif" ? "bg-emerald-100 text-emerald-800 border-emerald-200" : "bg-red-100 text-red-800 border-red-200"}`}>
                                         {t.status === "aktif" ? (
-                                            <><span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span> Aktif</>
+                                            <><span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Aktif</>
                                         ) : (
-                                            <><span className="w-1.5 h-1.5 rounded-full bg-destructive"></span>Nonaktif</>
+                                            <><span className="w-1.5 h-1.5 rounded-full bg-red-500"></span> Nonaktif</>
                                         )}
                                     </span>
                                 </td>
@@ -161,9 +162,10 @@ export default function DataGuruPage() {
                                         <Eye className="w-5 h-5"></Eye>
                                     </button>
                                 </td>
+                                <AnimatePresence>
                                 {viewingTeacher && (
-                                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-/70 backdrop-blur-sm">
-                                        <div className="bg-card w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                                    <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                                        <motion.div className="bg-card w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ duration: 0.25, ease: "easeOut" }}>
                                             <div className="bg-linear-to-r from-primary bg-amber-300 to-primary-foreground/80 p-6 flex justify-between items-center text-primary-foreground">
                                                 <div className="flex items-center gap-4">
                                                     {viewingTeacher.profilePicture ? (
@@ -255,10 +257,10 @@ export default function DataGuruPage() {
                                                     </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        </motion.div>
+                                    </motion.div>
                                 )}
-                                
+                                </AnimatePresence>
                             </tr>
                         ))}
                         {teachers.length === 0 && (
@@ -267,9 +269,10 @@ export default function DataGuruPage() {
                     </tbody>
                 </table>
             </div>
+            <AnimatePresence>
             {isModalOpen && (
-                <div className="fixed inset-0 bg-/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                    <div className="bg-card rounded-xl shadow-2xl max-w-3xl w-full p-6 border border-border max-h-[85vh] overflow-y-auto relative">
+                <motion.div className="fixed inset-0 bg-/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                    <motion.div className="bg-card rounded-xl shadow-2xl max-w-3xl w-full p-6 border border-border max-h-[85vh] overflow-y-auto relative" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ duration: 0.25, ease: "easeOut" }}>
                         <button title="X" onClick={() => setModalOpen(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted transition">
                             <X className="w-4 h-4"></X>
                         </button>
@@ -465,16 +468,17 @@ export default function DataGuruPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="flex justify-end bg-blend-overlay gap-3 pt-4 mt-2 border-t border-slate-200 bg-white sticky bottom-0 backdrop:blur-sm">
-                                <button type="button" onClick={() => setModalOpen(false)} className="px-6 py-2.5 text-slate-600 font-bold bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors">Batal</button>
+                            <div className="flex justify-end gap-3 pt-4 mt-2 border-t border-slate-200 bg-transparent sticky bottom-0 backdrop-blur-sm">
+                                <button type="button" onClick={() => setModalOpen(false)} className="px-6 py-2.5 text-white font-bold bg-red-600 hover:bg-red-700 rounded-xl transition-colors">Batal</button>
                                 <button type="submit" disabled={loading} className="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 disabled:opacity-70 transition-all shadow-md active:scale-95">
                                     {loading ? "Memproses..." : (selectedTeacher ? "Simpan perubahan" : "Simpan Guru")}
                                 </button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             )}
+            </AnimatePresence>
         </div>
     );
 }

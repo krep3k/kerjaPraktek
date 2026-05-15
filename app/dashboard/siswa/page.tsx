@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas } from "@/components/lib/actions";
 import { PlusCircle, Edit, Trash2, X, Search, UserIcon } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 
 export default function SiswaPage() {
     const {data: session} = useSession();
@@ -224,7 +224,7 @@ export default function SiswaPage() {
                             duration: 0.25,
                         }}>
                     <table className="w-full text-left text-sm text-gray-600 min-w-200 whitespace-nowrap">
-                        <thead className="bg-[#9eb8ff] border-b border-gray-200 text-gray-700 uppercase font-semibold">
+                        <thead className="bg-[#2735ff] border-b border-gray-200 text-white uppercase font-semibold">
                             <tr>
                                 <th className="px-6 py-4 w-16">No</th>
                                 <th className="px-6 py-4">NIS</th>
@@ -267,9 +267,10 @@ export default function SiswaPage() {
                     </motion.div>
                 )}
             </div>
+            <AnimatePresence>
             {showModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden">
+                <motion.div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                    <motion.div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ duration: 0.25, ease: "easeOut" }}>
                         <div className="px-6 py-4 border-b flex justify-between items-center">
                             <h2 className="text-lg font-bold">{editingId ? "Edit" : "Tambah Siswa"}</h2>
                             <button title="cancel" onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5"></X></button>
@@ -328,9 +329,10 @@ export default function SiswaPage() {
                                 <button title="submit" type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Simpan data</button>
                             </div>
                         </form>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             )}
+            </AnimatePresence>
         </div>
     );
 }
