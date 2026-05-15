@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Users, BookOpen, LayoutDashboard, ClipboardList, BookCheck, ClipboardCheckIcon, BookOpenCheckIcon, FolderKanban, User2Icon } from "lucide-react";
+import { Users, LayoutDashboard, ClipboardList, BookCheck, ClipboardCheckIcon, BookOpenCheckIcon, FolderKanban, User2Icon, NotebookPen } from "lucide-react";
 
 export default function SidebarNav({userRole, isCollapsed} : {userRole: string, isCollapsed: boolean}) {
     const pathName = usePathname();
@@ -11,7 +11,7 @@ export default function SidebarNav({userRole, isCollapsed} : {userRole: string, 
         {name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "kepsek"]},
         {name: "Absensi Guru", href: "/dashboard/absensi-guru", icon: ClipboardCheckIcon, roles: ["admin", "kepsek"]},
         {name: "Absensi Siswa", href: "/dashboard/absensi", icon: ClipboardList, roles: ["admin", "guru"]},
-        {name: "Nilai", href: "/dashboard/nilai", icon: BookOpen, roles: ["admin", "guru"]},
+        {name: "Nilai", href: "/dashboard/nilai", icon: NotebookPen, roles: ["admin", "guru"]},
         {name: "Rekapitulasi Siswa", href: "/dashboard/rekap", icon: BookCheck, roles: ["admin", "guru"]},
         {name: "Rekapitulasi Guru", href: "/dashboard/rekap-absensi-guru", icon: BookOpenCheckIcon, roles: ["admin", "kepsek"]},
         {name: "Bank Data", href: "/dashboard/gudang", icon: FolderKanban, roles: ["admin", "guru", "kepsek"]}

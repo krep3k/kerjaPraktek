@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/components/lib/auth";
-import { Users, UserCheck, GraduationCap, LayoutDashboard, ClipboardList, BookOpen, BookCheck, ClipboardCheckIcon, BookOpenCheck, FolderKanban, User2Icon } from "lucide-react";
+import { Users, UserCheck, GraduationCap, LayoutDashboard, ClipboardList, BookCheck, ClipboardCheckIcon, BookOpenCheck, FolderKanban, User2Icon, NotebookPen } from "lucide-react";
 import { getDashboardStats } from "@/components/lib/actions";
 
 const dashboardNavs = [
@@ -10,7 +10,7 @@ const dashboardNavs = [
     { name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "kepsek"], description: "Kelola data guru dan hak akses mereka." },
     { name: "Absensi Guru", href: "/dashboard/absensi-guru", icon: ClipboardCheckIcon, roles: ["admin", "kepsek"], description: "Lihat dan rekap absensi guru." },
     { name: "Absensi Siswa", href: "/dashboard/absensi", icon: ClipboardList, roles: ["admin", "guru"], description: "Catat kehadiran siswa harian secara cepat." },
-    { name: "Nilai", href: "/dashboard/nilai", icon: BookOpen, roles: ["admin", "guru"], description: "Masukkan dan tinjau nilai siswa." },
+    { name: "Nilai", href: "/dashboard/nilai", icon: NotebookPen, roles: ["admin", "guru"], description: "Masukkan dan tinjau nilai siswa." },
     { name: "Rekapitulasi Siswa", href: "/dashboard/rekap", icon: BookCheck, roles: ["admin", "guru"], description: "Lihat rekap absensi dan nilai siswa." },
     { name: "Rekapitulasi Guru", href: "/dashboard/rekap-absensi-guru", icon: BookOpenCheck, roles: ["admin", "kepsek"], description: "Lihat rekap bulanan absensi guru." },
     { name: "Bank Data", href: "/dashboard/gudang", icon: FolderKanban, roles: ["admin", "guru", "kepsek"], description: "Akses bank data dokumen dan file penting." },

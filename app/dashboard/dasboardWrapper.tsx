@@ -34,7 +34,7 @@ export default function DashboardWrapper({
                             <div className="bg-[#4452ed] p-2 rounded-xl">
                                 <div className="w-5 h-5 bg-white rounded-sm"></div>
                             </div>
-                            <span className="font-black text-xl tracking-tighter text-[#2D2735] uppercase">SDN SERUA 02</span>
+                            <span className="font-black text-xl text-[#2D2735] uppercase">SDN SERUA 02</span>
                         </div>
                     )}
                     <button title="Close Sidebar" onClick={() => setIsSidebarOpen(false)} className="lg:hidden p-2 text-[#6E6B7F] hover:bg-[#81CAD6]/10 rounded-lg">
