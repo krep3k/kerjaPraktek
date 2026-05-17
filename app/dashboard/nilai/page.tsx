@@ -176,7 +176,8 @@ export default function RekapNilaiPage() {
                     transition={{
                         duration: 0.25,
                     }}>
-                <table className="w-full text-left text-sm border-collapse rounded-xl mt-4">
+                <div className="rounded-2xl overflow-hidden border mt-4">
+                    <table className="w-full text-left text-sm border-collapse">
                     <thead className="bg-[#2522ff] text-white border-b">
                         <tr>
                             <th className="p-3 w-16">No</th>
@@ -221,7 +222,8 @@ export default function RekapNilaiPage() {
                             </tr>
                         ))}
                     </tbody>
-                </table>
+                    </table>
+                </div>
                 </motion.div>
             )}
         </div>
