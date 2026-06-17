@@ -482,13 +482,14 @@ export async function searchStudents(searchQuery: string) {
         const students = await Student.find({
             $or: [
                 { name: { $regex: searchQuery, $options: "i" } },
-                { nis: { $regex: searchQuery, $options: "i" } }
+                { nis: { $regex: searchQuery, $options: "i" } },
+                { nisn: { $regex: searchQuery, $options: "i" } }
             ]
-        }).sort({kelas: 1, rombel: 1, name: 1}).lean({ getters: true });
-        return JSON.parse(JSON.stringify(students))
+        }).sort({kelas: 1, rombel: 1, name: 1});
+        return JSON.parse(JSON.stringify(students));
     } catch (error) {
         console.error(error);
-        return[];
+        return [];
     }
 }
 
