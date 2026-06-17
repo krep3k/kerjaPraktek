@@ -479,14 +479,16 @@ export async function deleteStudent(id:string) {
 export async function searchStudents(searchQuery: string) {
     try {
         await connectToDatabase();
-        const students = await Student.find({
-            $or: [
-                { name: { $regex: searchQuery, $options: "i" } },
-                { nis: { $regex: searchQuery, $options: "i" } },
-                { nisn: { $regex: searchQuery, $options: "i" } }
-            ]
-        }).sort({kelas: 1, rombel: 1, name: 1});
-        return JSON.parse(JSON.stringify(students));
+        const students = await Student.find().sort({kelas: 1, rombel: 1, name: 1});
+        const decryptedStudents = JSON.parse(JSON.stringify(students));
+        const queryLower = searchQuery.trim().toLowerCase();
+
+        return decryptedStudents.filter((student: any) => {
+            const name = (student.name || "").toString().toLowerCase();
+            const nis = (student.nis || "").toString().toLowerCase();
+            const nisn = (student.nisn || "").toString().toLowerCase();
+            return name.includes(queryLower) || nis.includes(queryLower) || nisn.includes(queryLower);
+        });
     } catch (error) {
         console.error(error);
         return [];
