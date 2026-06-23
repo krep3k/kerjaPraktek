@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas } from "@/components/lib/actions";
 import { PlusCircle, Edit, Trash2, X, Search, UserIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import Swal from "sweetalert2";
 
 export default function SiswaPage() {
     const {data: session} = useSession();
@@ -126,16 +127,64 @@ export default function SiswaPage() {
             setStudents(data);
         }
     };
+
     const handleDelete = async (id: string, name: string) => {
-        if(confirm(`Apakah anda yakin ingin menghapus data siswa "${name}"? tindakan ini tidak bisa dibatalkan!`)) {
+        const result = await Swal.fire({
+            title: "Hapus data siswa?",
+            text: `Apakah anda yakin ingin menghapus data "${name}"? Tindakan ini tidak dapat dibatalkan!`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#3b82f6",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal",
+            background: "#ffffff",
+            customClass: {
+                popup: "rounded-xl",
+            },
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown animate__faster',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp animate__faster',
+            },
+        });
+        if(result.isConfirmed) {
             setLoading(true);
+            Swal.fire({
+                title: "Memproses...",
+                text: "Tunggu sebentar",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
             const res = await deleteStudent(id);
             if(res.error) {
-                alert("Error: " + res.error);
+                await Swal.fire({
+                    title: "Gagal menghapus!",
+                    text: "Error: " + res.error,
+                    icon: "error",
+                    confirmButtonColor: "#3b82f6",
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX'
+                    },
+                });
             } else {
                 const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
                 const data = await getStudentsFiltered(filterKelas, normalizedRombel);
                 setStudents(data);
+                await Swal.fire({
+                    title: "Berhasil!",
+                    text: `Data siswa "${name}" berhasil dihapus`,
+                    icon: "success",
+                    confirmButtonColor: "#3b82f6",
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__bounceIn'
+                    }
+                });
             }
             setLoading(false);
         }

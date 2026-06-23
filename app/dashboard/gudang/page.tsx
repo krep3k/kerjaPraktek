@@ -83,7 +83,7 @@ export default function GudangDataPage() {
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
-            <div className="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm flex flex-col md:flex-row md:items-center gap-6">
+            <div className="bg-white border border-slate-200 rounded-4xl p-6 shadow-sm flex flex-col md:flex-row md:items-center gap-6">
                 <div className={`p-4 rounded-2xl shrink-0 ${percentUsed > 90 ? 'bg-red-50 text-red-600' : 'bg-slate-50 text-slate-500'}`}>
                     <HardDrive size={32}/>
                 </div>
@@ -157,14 +157,14 @@ export default function GudangDataPage() {
                             <PlusCircle size={20}/>
                         </button>
                     </div>
-                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm min-h-[400px]">
+                    <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 shadow-sm min-h-100">
                         {loading ? (
                             <div className="py-20 flex flex-col items-center justify-center gap-4">
                                 <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
                                 <p className="font-bold text-slate-400">Menarik data dari brankas</p>
                             </div>
                         ) : files.length === 0 ? (
-                            <div className="text-center py-16 border-2 border-dashed border-slate-100 rounded-[2rem] bg-slate-50/50">
+                            <div className="text-center py-16 border-2 border-dashed border-slate-100 rounded-4xl bg-slate-50/50">
                                 <CloudUpload className="mx-auto h-16 w-16 text-slate-200 mb-4"/>
                                 <p className="text-slate-500 font-bold">Belum ada dile yang diupload</p>
                             </div>
@@ -202,7 +202,7 @@ export default function GudangDataPage() {
                 </div>
             )}
             {isUploadModalOpen && (
-                <div className="fixed inset-0 bg-slate-900/60 z-[60] flex items-center justify-center backdrop-blur-md p-4">
+                <div className="fixed inset-0 bg-slate-900/60 z-60 flex items-center justify-center backdrop-blur-md p-4">
                     <div className="bg-white rounded-[3rem] p-8 w-full max-w-md relative shadow-2xl animate-in zoom-in-95 duration-200">
                         <button title="X" onClick={() => setIsUploadModalOpen(false)} className="absolute top-6 right-6 p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 rounded-xl transition-colors"><X size={24}/></button>
                         <div className="mb-8">
