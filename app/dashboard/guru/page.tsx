@@ -129,7 +129,18 @@ export default function DataGuruPage() {
         if (teacher.profilePicture) {
             setViewingTeacher(teacher);
         } else {
-            alert("Tidak ada foto profile");
+            Swal.fire({
+                title: 'Foto Tidak Tersedia',
+                text: 'Guru yang bersangkutan belum mengunggah foto profil.',
+                icon: 'info',
+                confirmButtonColor: '#3b82f6',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp animate__faster'
+                }
+            })
         }
     };
 
@@ -137,25 +148,72 @@ export default function DataGuruPage() {
         if (viewingTeacher?.profilePicture) {
             setPreviewImage(viewingTeacher.profilePicture);
         } else {
-            alert("Tidak ada foto profile");
+            Swal.fire({
+                title: 'Foto Tidak Tersedia',
+                text: 'Guru yang bersangkutan belum mengunggah foto profil.',
+                icon: 'info',
+                confirmButtonColor: '#3b82f6',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp animate__faster'
+                }
+            })
         }
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
+        Swal.fire({
+            title: 'Menyimpan Data Guru...',
+            text: 'Mohon tunggu sebentar.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        })
         try {
             const formDataToSubmit = new FormData(e.currentTarget);
             const result = await saveTeacher(formDataToSubmit);
             if(result.error) {
-                alert("Gagal menyimpan data " + result.error);
+                await Swal.fire({
+                    title: 'Gagal Menyimpan!',
+                    text: "Gagal menyimpan data: " + result.error,
+                    icon: 'error',
+                    confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI Anda
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX' // Efek bergetar saat gagal
+                    }
+                });
             } else {
                 setModalOpen(false);
                 const freshTeacher = await getTeacher();
                 setTeachers(freshTeacher);
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Data guru berhasil disimpan.',
+                    icon: 'success',
+                    confirmButtonColor: '#3b82f6',
+                    timer: 2000, // Menutup otomatis dalam 2 detik
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__bounceIn'
+                    }
+                });
             }
         } catch(error) {
             console.error(error);
+            await Swal.fire({
+                title: 'Terjadi Kesalahan!',
+                text: 'Terjadi kesalahan sistem atau masalah jaringan. Silakan coba lagi.',
+                icon: 'error',
+                confirmButtonColor: '#3b82f6',
+                showClass: {
+                    popup: 'animate__animated animate__shakeX'
+                }
+            })
         } finally {
             setLoading(false);
         }

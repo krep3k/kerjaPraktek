@@ -5,6 +5,7 @@ import { getStudentsFiltered, getAbsensiRecord, getGNilaiRecord, getStudentAtten
 import { Download, CheckSquare, BookOpen } from "lucide-react";
 import { getMataPelajaranByKelas, getRombelByKelas } from "@/components/lib/constants";
 import { motion } from "motion/react";
+import Swal from "sweetalert2";
 
 interface Student {
     _id: string;
@@ -200,7 +201,15 @@ export default function RekapDataPage() {
 
     const downloadCSV = () => {
         if(tableData.length === 0) {
-            alert("Tidak ada data untuk diunduh!");
+            Swal.fire({
+                title: 'Gagal Mengunduh!',
+                text: 'Tidak ada data untuk diunduh!',
+                icon: 'warning',
+                confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI Anda
+                showClass: {
+                    popup: 'animate__animated animate__shakeX' // Efek bergetar karena validasi gagal
+                },
+            });
             return;
         }
 
@@ -229,7 +238,6 @@ export default function RekapDataPage() {
                 filename = `Rekap_Nilai_Bulanan_${mapel}_${jenisDisplay}_Bulan_${monthYear}_Kelas_${kelas}${rombel}_${semester}.csv`;
             }
         }
-
         const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -238,6 +246,17 @@ export default function RekapDataPage() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
+        Swal.fire({
+            title: 'Berhasil Diunduh!',
+            text: `File ekspor sedang diproses oleh browser Anda.`,
+            icon: 'success',
+            confirmButtonColor: '#3b82f6',
+            timer: 2000, // Menutup otomatis dalam 2 detik
+            timerProgressBar: true,
+            showClass: {
+                popup: 'animate__animated animate__bounceIn' // Efek bounce masuk yang mulus
+            }
+        });
     };
 
     return (

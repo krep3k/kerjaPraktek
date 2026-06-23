@@ -1,9 +1,9 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
 import { getTeacherAttendanceRecap, getAvailableAttendanceDates, getTeacherAttendanceMonthlySummary } from "@/components/lib/actions";
 import { Download, Search, CalendarDays, Calendar, ChevronLeft, XCircle } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function RekapAbsensiGuru() {
     const [isMounted, setIsMounted] = useState(false);
@@ -60,7 +60,18 @@ export default function RekapAbsensiGuru() {
     };
 
     const handleRangeSearch = async () => {
-        if(!start || !end) return alert("Pilih rentang tanggal terlebih dahulu");
+        if(!start || !end) {
+            Swal.fire({
+                title: 'Tanggal Belum Lengkap!',
+                text: 'Pilih rentang tanggal terlebih dahulu.',
+                icon: 'warning',
+                confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI Anda
+                showClass: {
+                    popup: 'animate__animated animate__shakeX' // Efek bergetar karena validasi kurang
+                }
+            });
+            return;
+        }
         const startTime = new Date(start).getTime();
         const endTime = new Date(end).getTime();
         const filtered = allDates.filter(d => {
@@ -77,9 +88,18 @@ export default function RekapAbsensiGuru() {
             setMonthlySummary(summary);
         } catch (error) {
             console.error("Gagal memuat rekap bulanan guru:", error);
-            alert("Gagal memuat rekap bulanan guru. Silakan coba lagi.");
+            await Swal.fire({
+                title: 'Gagal Memuat Data!',
+                text: 'Gagal memuat rekap bulanan guru. Silakan coba lagi.',
+                icon: 'error',
+                confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI Anda
+                showClass: {
+                    popup: 'animate__animated animate__shakeX' // Efek bergetar saat gagal
+                }
+            });
+        } finally {
+            setMonthlyLoading(false);
         }
-        setMonthlyLoading(false);
     };
 
     const handleResetFilter = () => {
@@ -89,7 +109,18 @@ export default function RekapAbsensiGuru() {
     };
 
     const exportToCSV = () => {
-        if(data.length === 0) return alert("Tidak ada data untuk diekspor");
+        if(data.length === 0) {
+            Swal.fire({
+                title: 'Gagal Mengekspor!',
+                text: 'Tidak ada data untuk diekspor',
+                icon: 'warning',
+                confirmButtonColor: '#3b82f6', // Menyesuaikan warna tema utama UI
+                showClass: {
+                    popup: 'animate__animated animate__shakeX' // Efek bergetar saat gagal validasi
+                }
+            });
+            return;
+        }
         const headers = ["Tanggal,ID Guru,Nama,JabatanStruktural,Status,Catatan\n"];
         const rows = data.map(i => {
             const dateStr = new Date(i.date).toLocaleDateString("id-ID");
@@ -104,10 +135,33 @@ export default function RekapAbsensiGuru() {
         a.href = url;
         a.download = `Absensi_Guru_${selectedDate}.csv`;
         a.click();
+        window.URL.revokeObjectURL(url);
+        Swal.fire({
+            title: 'Berhasil Diekspor!',
+            text: 'File absensi harian guru sedang diunduh.',
+            icon: 'success',
+            confirmButtonColor: '#3b82f6',
+            timer: 2000,
+            timerProgressBar: true,
+            showClass: {
+                popup: 'animate__animated animate__bounceIn' // Efek bounce masuk yang mulus
+            }
+        });
     };
 
     const exportMonthlySummaryToCSV = () => {
-        if(monthlySummary.length === 0) return alert("Tidak ada data bulanan untuk diekspor");
+        if(monthlySummary.length === 0) {
+            Swal.fire({
+                title: 'Gagal Mengekspor!',
+                text: 'Tidak ada data bulanan untuk diekspor',
+                icon: 'warning',
+                confirmButtonColor: '#3b82f6',
+                showClass: {
+                    popup: 'animate__animated animate__shakeX'
+                }
+            });
+            return;
+        }
         const headers = ["Nama Guru,ID Guru,Jabatan Struktural,Hadir,Sakit,Izin,Alpha,Total\n"];
         const rows = monthlySummary.map(i => `${i.name},${i.idGuru},${i.jabatanStruktural},${i.hadir},${i.sakit},${i.izin},${i.alpa},${i.total}\n`);
         const blob = new Blob([headers + rows.join("")], {type: "text/csv"});
@@ -116,6 +170,18 @@ export default function RekapAbsensiGuru() {
         a.href = url;
         a.download = `Rekap_Absensi_Guru_Bulanan_${monthlyMonth}.csv`;
         a.click();
+        window.URL.revokeObjectURL(url);
+        Swal.fire({
+            title: 'Berhasil Diekspor!',
+            text: 'File rekap bulanan guru sedang diunduh.',
+            icon: 'success',
+            confirmButtonColor: '#3b82f6',
+            timer: 2000,
+            timerProgressBar: true,
+            showClass: {
+                popup: 'animate__animated animate__bounceIn'
+            }
+        });
     };
 
     const formatDateIndo = (dateString: string) => {

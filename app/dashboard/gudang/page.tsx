@@ -5,6 +5,7 @@ import { useSession } from "next-auth/react";
 import { UploadDropZone } from "@/components/lib/uploadthing";
 import { simpanDataGudang, getGudangDataGuru, deleteDataGudang, getTeacher, getStorageStats } from "@/components/lib/actions";
 import { FileText, Image as ImageIcon, Trash2, Download, CloudUpload, X, Folder, ChevronLeft, Search, AlertTriangle, HardDrive, PlusCircle } from "lucide-react";
+import Swal from "sweetalert2";
 
 const MAX_STORAGE = 2 * 1024 * 1024 * 1024;
 
@@ -213,7 +214,15 @@ export default function GudangDataPage() {
                             const fileDipilih = selectedFiles[0];
                             const remainStorage = MAX_STORAGE - totalUsedStorage;
                             if(fileDipilih.size > remainStorage) {
-                                alert(`Penyimpanan tidak cukup.\n\nPenyimpanan tersisa ${formatBytes(remainStorage)}.\nUkuran file anda ${formatBytes(fileDipilih.size)}.`);
+                                Swal.fire({
+                                    title: 'Penyimpanan Tidak Cukup!',
+                                    html: `Penyimpanan tersisa: <b>${formatBytes(remainStorage)}</b>.<br>Ukuran file Anda: <b>${formatBytes(fileDipilih.size)}</b>.`,
+                                    icon: 'error',
+                                    confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI Anda
+                                    showClass: {
+                                        popup: 'animate__animated animate__shakeX' // Efek bergetar saat gagal validasi
+                                    }
+                                });
                                 return[];
                             }
                             return selectedFiles;

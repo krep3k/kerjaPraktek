@@ -7,6 +7,7 @@ import { Save } from "lucide-react";
 import { getRombelByKelas } from "@/components/lib/constants";
 import { getMataPelajaranByKelas } from "@/components/lib/constants";
 import { motion } from "motion/react";
+import Swal from "sweetalert2";
 
 export default function AbsensiPage() {
     const [kelas, setKelas] = useState<number>(1);
@@ -70,6 +71,14 @@ export default function AbsensiPage() {
 
     const handleSave = async () => {
         setLoading(true);
+        Swal.fire({
+            title: "Menyimpan absensi siswa...",
+            text: "Mohon tunggu sebentar",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
         const dataToSave = students.map(s => ({
             studentId: s._id,
             status: absensiData[s._id].status,
@@ -77,9 +86,27 @@ export default function AbsensiPage() {
         }));
         const res = await saveBulkAbsensi(dataToSave, kelas, rombel, tanggal);
         if(res.error) {
-            alert("Gagal menyimpan data:" + res.error);
+            await Swal.fire({
+                title: "Gagal menyimpan!",
+                text: "Gagal menyimpan data: " + res.error,
+                icon: "error",
+                confirmButtonColor: "#3b82f6",
+                showClass: {
+                    popup: 'animate__animated animate__shakeX',
+                }
+            });
         } else {
-            alert("Data absensi berhasil disimpan!");
+            await Swal.fire({
+                title: 'Berhasil!',
+                text: 'Data absensi berhasil disimpan!',
+                icon: 'success',
+                confirmButtonColor: '#3b82f6',
+                timer: 2000, // Menutup otomatis setelah 2 detik
+                timerProgressBar: true,
+                showClass: {
+                    popup: 'animate__animated animate__bounceIn' // Efek bounce masuk yang mulus
+                }
+            });
         }
         setLoading(false);
     };

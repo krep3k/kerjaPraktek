@@ -7,6 +7,7 @@ import { getMataPelajaranByKelas } from "@/components/lib/constants";
 import { Save } from "lucide-react";
 import { getRombelByKelas } from "@/components/lib/constants";
 import { motion } from "motion/react";
+import Swal from "sweetalert2";
 
 export default function RekapNilaiPage() {
     const [kelas, setKelas] = useState<number>(1);
@@ -74,6 +75,15 @@ export default function RekapNilaiPage() {
 
     const handleSave = async () => {
         setLoading(true);
+        Swal.fire({
+            title: 'Menyimpan Data Nilai...',
+            text: 'Mohon tunggu sebentar.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         const dataToSave = students.map(s => {
             if (isEkskulMapel) {
                 return {
@@ -86,13 +96,45 @@ export default function RekapNilaiPage() {
                 nilai: Number(nilaiData[s._id]) || 0
             };
         });
-        const res = await saveBulkNilai(dataToSave, kelas, rombel, semester, mapel, isEkskulMapel ? "ekskul" : jenisNilai, tanggal);
-        if(res.error){
-            alert("Gagal menyimpan data:" + res.error);
-        } else {
-            alert(`Data nilai ${isEkskulMapel ? `ekskul ${mapel}` : jenisNilai} tanggal ${tanggal} berhasil disimpan!`);
+        try {
+            const res = await saveBulkNilai(dataToSave, kelas, rombel, semester, mapel, isEkskulMapel ? "ekskul" : jenisNilai, tanggal);
+            if(res.error){
+                await Swal.fire({
+                    title: 'Gagal Menyimpan!',
+                    text: "Gagal menyimpan data: " + res.error,
+                    icon: 'error',
+                    confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX' // Efek bergetar saat gagal
+                    }
+                });
+            } else {
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: `Data nilai ${isEkskulMapel ? `ekskul ${mapel}` : jenisNilai} tanggal ${tanggal} berhasil disimpan!`,
+                    icon: 'success',
+                    confirmButtonColor: '#3b82f6',
+                    timer: 2500, // Diberi waktu 2.5 detik agar pengguna sempat membaca nama mapel/jenis nilainya
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__bounceIn' // Efek bounce masuk
+                    }
+                });
+            }
+        } catch(error) {
+            console.error("Gagal menyimpan nilai : ", error);
+            await Swal.fire({
+                title: 'Terjadi Kesalahan!',
+                text: 'Gagal menghubungi server. Periksa koneksi internet Anda.',
+                icon: 'error',
+                confirmButtonColor: '#3b82f6',
+                showClass: {
+                    popup: 'animate__animated animate__shakeX'
+                }
+            });
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
     return (
         <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border">

@@ -116,15 +116,55 @@ export default function SiswaPage() {
     };
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        const res = editingId ? await updateStudents(editingId, formData) : await addStudents(formData);
-        if(res.error) {
-            alert("Error: " + res.error);
-        } else {
-            setShowModal(false);
-            // Refresh the student list
-            const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
-            const data = await getStudentsFiltered(filterKelas, normalizedRombel);
-            setStudents(data);
+        Swal.fire({
+            title: editingId ? 'Memperbarui Data Siswa...' : 'Menambahkan Data Siswa...',
+            text: 'Mohon tunggu sebentar.',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+        try {
+            const res = editingId ? await updateStudents(editingId, formData) : await addStudents(formData);
+            if(res.error) {
+                await Swal.fire({
+                    title: 'Gagal Menyimpan!',
+                    text: "Error: " + res.error,
+                    icon: 'error',
+                    confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI Anda
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX' // Efek bergetar saat gagal
+                    }
+                });
+            } else {
+                setShowModal(false);
+                // Refresh the student list
+                const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
+                const data = await getStudentsFiltered(filterKelas, normalizedRombel);
+                setStudents(data);
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: editingId ? 'Data siswa berhasil diperbarui.' : 'Data siswa berhasil ditambahkan.',
+                    icon: 'success',
+                    confirmButtonColor: '#3b82f6',
+                    timer: 2000, // Menutup otomatis dalam 2 detik
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__bounceIn' // Efek bounce masuk yang mulus
+                    }
+                });
+            }
+        } catch(error) {
+            console.error("Gagal memproses data siswa:", error);
+            await Swal.fire({
+                title: 'Terjadi Kesalahan!',
+                text: 'Gagal terhubung ke server. Silakan periksa koneksi internet Anda.',
+                icon: 'error',
+                confirmButtonColor: '#3b82f6',
+                showClass: {
+                    popup: 'animate__animated animate__shakeX'
+                }
+            });
         }
     };
 
