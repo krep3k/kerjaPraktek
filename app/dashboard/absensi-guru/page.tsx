@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { getTeacherWithClass, saveTeacherAttendance } from "@/components/lib/actions";
 import { Save } from "lucide-react";
+import Swal from "sweetalert2";
 
 export default function AbsensiGuruPage() {
     const [teachers, setTeachers] = useState<any[]>([]);
@@ -42,16 +43,42 @@ export default function AbsensiGuruPage() {
     const handleSave = async () => {
         setLoading(true);
         try {
+            Swal.fire({
+                title: "Menyimpan absensi...",
+                text: "Mohon tunggu sebentar",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            })
             const payload = Object.keys(attendance).map(id => ({
                 userId: id,
                 status: attendance[id].status,
                 notes: attendance[id].notes,
             }));
             await saveTeacherAttendance(payload, date);
-            alert("Absensi berhasil disimpan!");
+            await Swal.fire({
+                title: "Berhasil!",
+                text: "Absensi berhasi disimpan",
+                icon: "success",
+                confirmButtonColor: "#3b82f6",
+                timer: 2000,
+                timerProgressBar: true,
+                showClass: {
+                    popup: 'animate__animated animate__bounceIn',
+                }
+            });
         } catch (error) {
             console.error("Gagal menyimpan absensi:", error);
-            alert("Gagal menyimpan absensi. Silakan coba lagi.");
+            await Swal.fire({
+                title: "Gagal menyimpan!",
+                text: "Gagal menyimpan absensi, silahkan coba lagi",
+                icon: "error",
+                confirmButtonColor: "#3b82f6",
+                showClass: {
+                    popup: 'animate__animated animate__shakeX'
+                }
+            })
         } finally {
             setLoading(false);
         }

@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { getTeacher, saveTeacher, deleteTeacher } from "@/components/lib/actions";
 import { User as UserIcon, Pencil, Trash2, X, PlusCircle, Eye } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import Swal from "sweetalert2";
 
 interface Teacher {
     _id: string;
@@ -55,15 +56,61 @@ export default function DataGuruPage() {
     };
 
     const handleDelete = async (id: string, name: string) => {
-        if(confirm(`Apakah anda yakin ingin menghapus data guru "${name}"? Tindakan ini tidak dapat dibatalkan`)) {
+        const result = await Swal.fire({
+            title: "Hapus data guru?",
+            text: `Apakah anda yakin ingin menghapus data guru "${name}"? Tindakan ini tidak bisa dibatalkan!`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#3b82f6",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal",
+            background: "#ffffff",
+            customClass: {
+                popup: "rounded-xl",
+            },
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown animate__faster',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp animate__faster',
+            },
+        });
+        if(result.isConfirmed) {
             setLoading(true);
+            Swal.fire({
+                title: "Memproses...",
+                text: "Mohon tunggu sebentar",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
             const res = await deleteTeacher(id);
             if(res.error) {
-                alert(res.error);
+                await Swal.fire({
+                    title: "Gagal menghapus!",
+                    text: res.error,
+                    icon: "error",
+                    confirmButtonColor: "#3b82f6",
+                    showClass: {
+                        popup: 'animate__animated animate__shakeX',
+                    },
+                });
             } else {
-                // Refresh data setelah delete berhasil
                 const freshTeacher = await getTeacher();
                 setTeachers(freshTeacher);
+                await Swal.fire({
+                    title: "Berhasil!",
+                    text: `Data guru "${name}" berhasil dihapus`,
+                    icon: "success",
+                    confirmButtonColor: "#3b82f6",
+                    timer: 2000,
+                    timerProgressBar: true,
+                    showClass: {
+                        popup: 'animate__animated animate__bounceIn',
+                    }
+                });
             }
             setLoading(false);
         }
