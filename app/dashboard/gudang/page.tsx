@@ -64,9 +64,51 @@ export default function GudangDataPage() {
     }, [userRole, userId, selectedTeacher, refreshKey]);
 
     const handleDelete = async (fileId: string) => {
-        if(confirm("Yakin ingin menghapus file ini?")) {
-            await deleteDataGudang(fileId);
-            setRefreshKey(prev => prev + 1);
+        const result = await Swal.fire({
+            title: 'Hapus File?',
+            text: 'Apakah Anda yakin ingin menghapus file ini? Tindakan ini tidak dapat dibatalkan.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444', // Warna merah destruktif
+            cancelButtonColor: '#64748b',  // Warna slate tenang untuk batal
+            confirmButtonText: 'Ya, Hapus!',
+            cancelButtonText: 'Batal',
+            showClass: {
+                popup: 'animate__animated animate__fadeInUp animate__faster'
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutDown animate__faster'
+            }
+        });
+        if(result.isConfirmed) {
+            Swal.fire({
+                title: 'Menghapus File...',
+                text: 'Mohon tunggu sebentar.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            try {
+                await deleteDataGudang(fileId);
+                setRefreshKey(prev => prev + 1);
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'File telah berhasil dihapus dari brankas data.',
+                    icon: 'success',
+                    confirmButtonColor: '#3b82f6',
+                    timer: 1500,
+                    timerProgressBar: true
+                });
+            } catch(error) {
+                console.error("Gagal menghapus file: ", error);
+                await Swal.fire({
+                    title: 'Gagal Menghapus!',
+                    text: 'Terjadi kesalahan sistem jaringan saat mencoba menghapus file.',
+                    icon: 'error',
+                    confirmButtonColor: '#3b82f6'
+                });
+            }
         }
     };
 
@@ -229,18 +271,52 @@ export default function GudangDataPage() {
                         }}
                         onClientUploadComplete={async (res) => {
                             if(res && res.length > 0) {
-                                const uploadedFile = res[0];
-                                const ext = uploadedFile.name.split(".").pop() || "unknow";
-                                await simpanDataGudang({
-                                    namaFile: uploadedFile.name,
-                                    urlFile: uploadedFile.url,
-                                    typeFile: ext,
-                                    ukuranFile: uploadedFile.size,
-                                    pemilikId: selectedTeacher?._id
+                                Swal.fire({
+                                    title: 'Menyimpan Informasi File...',
+                                    text: 'Sedang mengamankan rekaman berkas di database sekolah.',
+                                    allowOutsideClick: false,
+                                    didOpen: () => {
+                                        Swal.showLoading();
+                                    }
                                 });
-                                setIsUploadModalOpen(false);
-                                setRefreshKey(prev => prev + 1);
+                                try {
+                                    const uploadedFile = res[0];
+                                    const ext = uploadedFile.name.split(".").pop() || "unknow";
+                                    await simpanDataGudang({
+                                        namaFile: uploadedFile.name,
+                                        urlFile: uploadedFile.url,
+                                        typeFile: ext,
+                                        ukuranFile: uploadedFile.size,
+                                        pemilikId: selectedTeacher?._id || userId
+                                    });
+                                    setIsUploadModalOpen(false);
+                                    setRefreshKey(prev => prev + 1);
+                                    await Swal.fire({
+                                        title: 'Berhasil Diunggah!',
+                                        text: 'File telah sukses tersimpan di brankas data sekolah.',
+                                        icon: 'success',
+                                        confirmButtonColor: '#3b82f6',
+                                        timer: 2000,
+                                        timerProgressBar: true
+                                    });
+                                } catch(error) {
+                                    console.error(error);
+                                    await Swal.fire({
+                                        title: 'Gagal Menyimpan!',
+                                        text: 'File berhasil terunggah, namun gagal dicatat ke database lokal.',
+                                        icon: 'error',
+                                        confirmButtonColor: '#3b82f6'
+                                    });
+                                }
                             }
+                        }}
+                        onUploadError={(error) => {
+                            Swal.fire({
+                                title: 'Gagal Mengunggah!',
+                                text: `Terjadi kendala: ${error.message}`,
+                                icon: 'error',
+                                confirmButtonColor: '#3b82f6'
+                            });
                         }}
                         appearance={{
                             container: "w-full flex flex-col items-center justify-center border-2 border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-100 rounded-[2rem] py-12 px-6 transition-all cursor-pointer group relative",
