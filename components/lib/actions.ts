@@ -621,3 +621,54 @@ export async function getStorageStats() {
     ]);
     return result.length > 0 ? result[0].totalSize: 0;
 }
+
+export async function getTeacherAndKepsekForTu() {
+    await connectToDatabase();
+    const users = await User.find({ 
+        role: { $in: ["guru", "kepsek"] },
+        status: "aktif" 
+    }).sort({ name: 1 });
+    return users.map((user) => JSON.parse(JSON.stringify(user.toObject({ getters: true }))));
+}
+
+export async function getKepsek() {
+    await connectToDatabase();
+    const kepsek = await User.findOne({ role: "kepsek" });
+    if (!kepsek) return null;
+    return JSON.parse(JSON.stringify(kepsek.toObject({ getters: true })));
+}
+
+export async function getGuruOnly() {
+    await connectToDatabase();
+    const gurus = await User.find({ role: "guru" }).sort({ name: 1 });
+    return gurus.map((guru) => JSON.parse(JSON.stringify(guru.toObject({ getters: true }))));
+}
+
+export async function updateKepsek(userId: string) {
+    try {
+        await connectToDatabase();
+        
+        // Remove kepsek role from current kepsek if exists
+        await User.updateOne({ role: "kepsek" }, { $set: { role: "guru" } });
+        
+        // Set new kepsek
+        const result = await User.findByIdAndUpdate(userId, { $set: { role: "kepsek" } }, { new: true });
+        return JSON.parse(JSON.stringify(result.toObject({ getters: true })));
+    } catch (error) {
+        console.error("Error updating kepsek:", error);
+        throw new Error("Gagal mengubah kepala sekolah");
+    }
+}
+
+export async function deleteKepsek() {
+    try {
+        await connectToDatabase();
+        
+        // Change kepsek back to guru
+        const result = await User.updateOne({ role: "kepsek" }, { $set: { role: "guru" } });
+        return result;
+    } catch (error) {
+        console.error("Error deleting kepsek:", error);
+        throw new Error("Gagal menghapus kepala sekolah");
+    }
+}

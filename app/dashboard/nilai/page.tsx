@@ -2,6 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { getGNilaiRecord, saveBulkNilai, getStudentsFiltered } from "@/components/lib/actions";
 import { getMataPelajaranByKelas } from "@/components/lib/constants";
 import { Save } from "lucide-react";
@@ -10,6 +11,9 @@ import { motion } from "motion/react";
 import Swal from "sweetalert2";
 
 export default function RekapNilaiPage() {
+    const {data: session} = useSession();
+    const userRole = (session?.user as any)?.role;
+    const isReadOnly = userRole === "tu";
     const [kelas, setKelas] = useState<number>(1);
     const [rombel, setRombel] = useState<string>("A");
     const [semester, setSemester] = useState<string>("Ganjil");
@@ -140,35 +144,35 @@ export default function RekapNilaiPage() {
         <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
             <div className="flex justify-between items-center border-b pb-4">
                 <h1 className="text-2xl font-bold text-gray-800">Record input nilai</h1>
-                <button title="save" onClick={handleSave} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    <Save className="w-5 h-5">Simpan Nilai</Save>
+                <button title="save" onClick={handleSave} disabled={isReadOnly} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed">
+                    <Save className="w-5 h-5">{isReadOnly ? "Read only (TU)" : "Simpan Nilai"}</Save>
                 </button>
             </div>
             <div className="flex flex-wrap gap-4 bg-gray-50 p-4 rounded-xl border mb-6">
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Kelas
                     <label htmlFor="">
-                        <select title="kelas" name="" id="" value={kelas} onChange={handleKelasChange} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                        <select title="kelas" name="" id="" value={kelas} onChange={handleKelasChange} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                             {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
                         </select>
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Rombel
                     <label htmlFor="">
-                        <select title="rombel" name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                        <select title="rombel" name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                             {rombelOption.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Semester
                     <label htmlFor="">
-                        <select title="semester" name="" id="" value={semester} onChange={e => setSemester(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                        <select title="semester" name="" id="" value={semester} onChange={e => setSemester(e.target.value)} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                             <option value="Ganjil">Ganjil</option>
                             <option value="Genap">Genap</option>
                         </select>
                     </label>
                 </div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1">Mata Pelajaran
-                    <select title="mapel" name="mapel" id="mapel" value={mapel} onChange={handleMapelChange} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                    <select title="mapel" name="mapel" id="mapel" value={mapel} onChange={handleMapelChange} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                         {mataPelajaranOption.mapelGuruKelas.map(m => (
                             <option value={m} key={m}>{m}</option>
                         ))}
@@ -202,7 +206,7 @@ export default function RekapNilaiPage() {
                 </div>
                 <div>
                     <label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal</label>
-                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium" />
+                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed" />
                 </div>
             </div>
 
@@ -240,7 +244,8 @@ export default function RekapNilaiPage() {
                                             title="Nilai ekskul"
                                             value={nilaiData[s._id] || "-"}
                                             onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})}
-                                            className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                            disabled={isReadOnly}
+                                            className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                         >
                                             <option value="A">A</option>
                                             <option value="B">B</option>
@@ -256,7 +261,8 @@ export default function RekapNilaiPage() {
                                             max={100}
                                             value={nilaiData[s._id] || ""}
                                             onChange={e => setNilaiData({...nilaiData, [s._id]: e.target.value})}
-                                            className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                            disabled={isReadOnly}
+                                            className="w-24 text-center border p-1 rounded-md font-bold text-blue-600 focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                             placeholder="Nilai"
                                         />
                                     )}

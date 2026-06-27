@@ -6,15 +6,15 @@ import { Users, LayoutDashboard, ClipboardList, BookCheck, ClipboardCheckIcon, B
 export default function SidebarNav({userRole, isCollapsed} : {userRole: string, isCollapsed: boolean}) {
     const pathName = usePathname();
     const navs = [
-        {name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "guru", "kepsek"]},
-        {name: "Data Siswa", href: "/dashboard/siswa", icon: Users, roles: ["admin", "guru", "kepsek"]},
-        {name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "kepsek"]},
-        {name: "Absensi Guru", href: "/dashboard/absensi-guru", icon: ClipboardCheckIcon, roles: ["admin", "kepsek"]},
-        {name: "Absensi Siswa", href: "/dashboard/absensi", icon: ClipboardList, roles: ["admin", "guru"]},
-        {name: "Nilai", href: "/dashboard/nilai", icon: NotebookPen, roles: ["admin", "guru"]},
-        {name: "Rekapitulasi Siswa", href: "/dashboard/rekap", icon: BookCheck, roles: ["admin", "guru"]},
-        {name: "Rekapitulasi Guru", href: "/dashboard/rekap-absensi-guru", icon: BookOpenCheckIcon, roles: ["admin", "kepsek"]},
-        {name: "Bank Data", href: "/dashboard/gudang", icon: FolderKanban, roles: ["admin", "guru", "kepsek"]}
+        {name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, roles: ["admin", "guru", "kepsek", "tu"]},
+        {name: "Data Siswa", href: "/dashboard/siswa", icon: Users, roles: ["admin", "guru", "tu", "kepsek"]},
+        {name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "kepsek", "tu"]},
+        {name: "Absensi Guru", href: "/dashboard/absensi-guru", icon: ClipboardCheckIcon, roles: ["admin", "kepsek", "tu"]},
+        {name: "Absensi Siswa", href: "/dashboard/absensi", icon: ClipboardList, roles: ["admin", "guru", "tu"]},
+        {name: "Nilai", href: "/dashboard/nilai", icon: NotebookPen, roles: ["admin", "guru", "tu"]},
+        {name: "Rekapitulasi Siswa", href: "/dashboard/rekap", icon: BookCheck, roles: ["admin", "guru", "tu"]},
+        {name: "Rekapitulasi Guru", href: "/dashboard/rekap-absensi-guru", icon: BookOpenCheckIcon, roles: ["admin", "kepsek", "tu"]},
+        {name: "Bank Data", href: "/dashboard/gudang", icon: FolderKanban, roles: ["admin", "guru", "kepsek", "tu"]}
     ];
 
     const filteredNavs = navs.filter(nav => nav.roles.includes(userRole));

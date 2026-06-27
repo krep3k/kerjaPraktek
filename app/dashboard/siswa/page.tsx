@@ -1,8 +1,9 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas } from "@/components/lib/actions";
+import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas, getKepsek } from "@/components/lib/actions";
 import { PlusCircle, Edit, Trash2, X, Search, UserIcon } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Swal from "sweetalert2";
@@ -12,6 +13,7 @@ export default function SiswaPage() {
     const [students, setStudents] = useState<any[]>([]);
     const [filterKelas, setFilterKelas] = useState<number>(1);
     const [filterRombel, setFilterRombel] = useState<string>("A");
+    const [kepsek, setKepsek] = useState<any>(null);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const availableRombels = (filterKelas <= 4) ? ["A", "B", "C"] : ["A", "B"];
     const [showModal, setShowModal] = useState(false);
@@ -25,6 +27,7 @@ export default function SiswaPage() {
     const [loading, setLoading] = useState(true);
     const userRole = session?.user ? (session?.user as any).role : null;
     const isAdmin = userRole === "admin";
+    const showKepsekCard = userRole && userRole !== "kepsek";
 
     useEffect(() => {
         const fetchTeachers = async () => {
@@ -35,6 +38,16 @@ export default function SiswaPage() {
         };
         fetchTeachers();
     }, [isAdmin]);
+
+    useEffect(() => {
+        const fetchKepsek = async () => {
+            if (showKepsekCard) {
+                const data = await getKepsek();
+                setKepsek(data);
+            }
+        };
+        fetchKepsek();
+    }, [showKepsekCard]);
 
     useEffect(() => {
         let isMounted = true;
@@ -247,25 +260,44 @@ export default function SiswaPage() {
                     </button>
                 )}
                 </div>
-                    <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl mb-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-center gap-3">
-                            <div className="bg-blue-600 p-2.5 rounded-lg text-white shadow-sm">
-                                <UserIcon className="w-5 h-5"></UserIcon>
-                            </div>
-                            <div>
-                                <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-0.5">Informasi Kelas</h4>
-                                <p className="text-sm font-semibold text-blue-900">
-                                    Wali Kelas {filterKelas} {filterRombel} : <span className="font-bold text-blue-700 ml-1">{loadingWali ? "Memuat..." : (waliKelas ? waliKelas.name : "Belum Diatur")}</span>
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                    <span className="bg-white text-blue-800 text-[11px] px-2.5 py-1 rounded-md font-bold border border-blue-200 shadow-sm">Total: {totalSiswa} Siswa</span>
-                                    <span className="bg-emerald-50 text-emerald-700 text-[11px] px-2.5 py-1 rounded-md font-bold border border-emerald-200">Laki-laki: {totalL}</span>
-                                    <span className="bg-rose-50 text-rose-700 text-[11px] px-2.5 py-1 rounded-md font-bold border border-rose-200">Perempuan: {totalP}</span>
+                    <div className="bg-blue-50/50 border border-blue-100 p-4 rounded-xl mb-6 shadow-sm flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                        <div className="flex-1 flex flex-col gap-4">
+                            <div className="flex items-start gap-3">
+                                <div className="bg-blue-600 p-2.5 rounded-lg text-white shadow-sm mt-1">
+                                    <UserIcon className="w-5 h-5"></UserIcon>
+                                </div>
+                                <div>
+                                    <h4 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-0.5">Informasi Kelas</h4>
+                                    <p className="text-sm font-semibold text-blue-900">
+                                        Wali Kelas {filterKelas} {filterRombel} : <span className="font-bold text-blue-700 ml-1">{loadingWali ? "Memuat..." : (waliKelas ? waliKelas.name : "Belum Diatur")}</span>
+                                    </p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <span className="bg-white text-blue-800 text-[11px] px-2.5 py-1 rounded-md font-bold border border-blue-200 shadow-sm">Total: {totalSiswa} Siswa</span>
+                                        <span className="bg-emerald-50 text-emerald-700 text-[11px] px-2.5 py-1 rounded-md font-bold border border-emerald-200">Laki-laki: {totalL}</span>
+                                        <span className="bg-rose-50 text-rose-700 text-[11px] px-2.5 py-1 rounded-md font-bold border border-rose-200">Perempuan: {totalP}</span>
+                                    </div>
                                 </div>
                             </div>
+                            {showKepsekCard && (
+                                <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-xl p-4 shadow-sm max-w-sm">
+                                    <div className="shrink-0">
+                                        {kepsek?.profilePicture ? (
+                                            <img src={kepsek.profilePicture} alt={kepsek.name} className="w-16 h-16 rounded-full object-cover" />
+                                        ) : (
+                                            <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xl font-semibold">
+                                                {kepsek?.name ? kepsek.name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase() : "KP"}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div>
+                                        <p className="text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Kepala Sekolah</p>
+                                        <p className="text-lg font-semibold text-gray-900 truncate max-w-xs">{kepsek?.name || "Belum ditetapkan"}</p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         {isAdmin && (
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-col items-start gap-2 md:items-end">
                                 <label htmlFor="wk" className="text-sm font-semibold text-blue-800">Pilih Wali Kelas</label>
                                 <select name="wk" id="wk" title="Pilih wali kelas" value={waliKelas?._id || ""} onChange={handleWaliKelasChange} disabled={loadingWali} className="border border-blue-200 bg-white text-blue-800 p-2 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm disabled:opacity-50 min-w-50">
                                     <option value="">Kosongkan/Belum ada</option>

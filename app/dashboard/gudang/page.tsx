@@ -3,7 +3,7 @@
 import React, {useState, useEffect} from "react";
 import { useSession } from "next-auth/react";
 import { UploadDropZone } from "@/components/lib/uploadthing";
-import { simpanDataGudang, getGudangDataGuru, deleteDataGudang, getTeacher, getStorageStats } from "@/components/lib/actions";
+import { simpanDataGudang, getGudangDataGuru, deleteDataGudang, getTeacher, getStorageStats, getTeacherAndKepsekForTu } from "@/components/lib/actions";
 import { FileText, Image as ImageIcon, Trash2, Download, CloudUpload, X, Folder, ChevronLeft, Search, AlertTriangle, HardDrive, PlusCircle } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -38,6 +38,12 @@ export default function GudangDataPage() {
                 setTeachers(data);
             };
             loadTeacher();
+        } else if(userRole === "tu") {
+            const loadTeacherAndKepsek = async () => {
+                const data = await getTeacherAndKepsekForTu();
+                setTeachers(data);
+            };
+            loadTeacherAndKepsek();
         }
     }, [userRole]);
 
@@ -46,8 +52,8 @@ export default function GudangDataPage() {
             const usedBytes = await getStorageStats();
             setTotalUsedStorage(usedBytes);
             let idToFetch = null;
-            if(userRole === "admin") {
-                idToFetch = selectedTeacher?._id;
+            if(userRole === "admin" || userRole === "tu") {
+                idToFetch = selectedTeacher?._id || userId;
             } else {
                 idToFetch = userId;
             }
@@ -157,11 +163,11 @@ export default function GudangDataPage() {
                     </div>
                 </div>
             )}
-            {userRole === "admin" && !selectedTeacher ? (
+            {(userRole === "admin" || userRole === "tu") && !selectedTeacher ? (
                 <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Bank Data Sekolah</h1>
+                            <h1 className="text-3xl font-black text-slate-800 tracking-tight">{userRole === "admin" ? "Bank Data Sekolah" : "Pilih User untuk Upload"}</h1>
                         </div>
                         <div className="relative max-w-sm w-full">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18}/>
@@ -185,14 +191,14 @@ export default function GudangDataPage() {
                 <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
-                            {userRole === "admin" && (
+                            {(userRole === "admin" || userRole === "tu") && (
                                 <button title="back" onClick={() => setSelectedTeacher(null)} className="p-2 bg-white border border-slate-200 text-slate-500 rounded-xl hover:bg-slate-50 transition-all shadow-sm">
                                     <ChevronLeft size={24}/>
                                 </button>
                             )}
                             <div>
                                 <h1 className="text-3xl font-black text-slate-800 tracking-tight">
-                                    {userRole === "admin" ? `Folder: ${selectedTeacher?.name}`: "Bank Data"}
+                                    {selectedTeacher?.name ? `Folder: ${selectedTeacher?.name}` : "Bank Data"}
                                 </h1>
                             </div>
                         </div>

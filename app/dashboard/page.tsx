@@ -7,7 +7,7 @@ import { getDashboardStats } from "@/components/lib/actions";
 
 const dashboardNavs = [
     { name: "Data Siswa", href: "/dashboard/siswa", icon: Users, roles: ["admin", "guru", "kepsek"], description: "Kelola data siswa dan lihat informasi lengkap." },
-    { name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "kepsek"], description: "Kelola data guru dan hak akses mereka." },
+    { name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "tu", "kepsek"], description: "Kelola data guru dan hak akses mereka." },
     { name: "Absensi Guru", href: "/dashboard/absensi-guru", icon: ClipboardCheckIcon, roles: ["admin", "kepsek"], description: "Lihat dan rekap absensi guru." },
     { name: "Absensi Siswa", href: "/dashboard/absensi", icon: ClipboardList, roles: ["admin", "guru"], description: "Catat kehadiran siswa harian secara cepat." },
     { name: "Nilai", href: "/dashboard/nilai", icon: NotebookPen, roles: ["admin", "guru"], description: "Masukkan dan tinjau nilai siswa." },

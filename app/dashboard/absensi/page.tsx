@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { getAbsensiRecord, saveBulkAbsensi, getStudentsFiltered } from "@/components/lib/actions";
 import { Save } from "lucide-react";
 import { getRombelByKelas } from "@/components/lib/constants";
@@ -10,6 +11,9 @@ import { motion } from "motion/react";
 import Swal from "sweetalert2";
 
 export default function AbsensiPage() {
+    const {data: session} = useSession();
+    const userRole = (session?.user as any)?.role;
+    const isReadOnly = userRole === "tu";
     const [kelas, setKelas] = useState<number>(1);
     const [rombel, setRombel] = useState<string>("A");
     const today = new Date().toISOString().split("T")[0];
@@ -116,24 +120,24 @@ export default function AbsensiPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Record Absensi Siswa</h1>
                 <div className="flex gap-3">
-                    <button title="save" onClick={handleSave} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                        <Save className="w-5 h-5">Simpan</Save>
+                    <button title="save" onClick={handleSave} disabled={isReadOnly} className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-70 disabled:cursor-not-allowed">
+                        <Save className="w-5 h-5">{isReadOnly ? "Read only (TU)" : "Simpan"}</Save>
                     </button>
                 </div>
             </div>
             <div className="flex gap-4">
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Kelas
-                    <select name="" id="" value={kelas} onChange={handleKelasChange} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                    <select name="" id="" value={kelas} onChange={handleKelasChange} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                         {[1, 2, 3, 4, 5, 6].map(k => <option key={k} value={k}>{k}</option>)}
                     </select>
                 </label></div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="" className="block text-sm font-semibold text-blue-700 mb-1">Rombel
-                    <select name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium">
+                    <select name="" id="" value={rombel} onChange={e => setRombel(e.target.value)} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed">
                         {rombelOption.map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                 </label></div>
                 <div className="block text-sm font-semibold text-blue-700 mb-1"><label htmlFor="date" className="block text-sm font-semibold text-blue-700 mb-1">Tanggal
-                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium" />
+                    <input id="date" type="date" value={tanggal} onChange={e => setTanggal(e.target.value)} disabled={isReadOnly} className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer shadow-sm text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed" />
                 </label></div>
             
             </div>
@@ -174,7 +178,9 @@ export default function AbsensiPage() {
                                             ].map(st => {
                                                 const isActive = absensiData[s._id]?.status === st.id;
                                                 return (
-                                                    <button key={st.id} type="button" onClick={() => handleStatusSelect(s._id, st.id)} className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all border ${isActive ? st.activeClass : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}>
+                                                    <button key={st.id} type="button" onClick={() => {
+                                                        if(!isReadOnly) handleStatusSelect(s._id, st.id);
+                                                    }} disabled={isReadOnly} className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold uppercase transition-all border disabled:cursor-not-allowed ${isActive ? st.activeClass : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"} ${isReadOnly ? "opacity-60" : ""}`}>
                                                         {st.label}
                                                     </button>
                                                 )
@@ -183,7 +189,7 @@ export default function AbsensiPage() {
                                     </td>
                                     <td className="p-3 align-top max-w-65">
                                         <label htmlFor={`ket-${s._id}`} className="sr-only">Keterangan</label>
-                                        <input id={`ket-${s._id}`} type="text" placeholder={absensiData[s._id]?.status === "Hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir"} className={`w-full min-w-0 border rounded-lg outline-none text-xs p-2.5 transition-colors ${absensiData[s._id]?.status === "Hadir" ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
+                                        <input id={`ket-${s._id}`} type="text" placeholder={absensiData[s._id]?.status === "Hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={absensiData[s._id]?.keterangan || ""} onChange={e => handleAbsenChange(s._id, "keterangan", e.target.value)} disabled={absensiData[s._id]?.status === "Hadir" || isReadOnly} className={`w-full min-w-0 border rounded-lg outline-none text-xs p-2.5 transition-colors ${absensiData[s._id]?.status === "Hadir" || isReadOnly ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
                                     </td>
                                 </tr>
                             ))}

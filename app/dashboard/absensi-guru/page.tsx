@@ -1,11 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import { getTeacherWithClass, saveTeacherAttendance } from "@/components/lib/actions";
 import { Save } from "lucide-react";
 import Swal from "sweetalert2";
 
 export default function AbsensiGuruPage() {
+    const {data: session} = useSession();
+    const userRole = (session?.user as any)?.role;
+    const isReadOnly = userRole === "tu";
     const [teachers, setTeachers] = useState<any[]>([]);
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
     const [attendance, setAttendance] = useState<any>({});
@@ -93,10 +97,10 @@ export default function AbsensiGuruPage() {
                 <div className="flex flex-col gap-3 w-full sm:w-auto sm:flex-row sm:items-center">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                         <label htmlFor="date" className="text-sm font-semibold text-slate-700 min-w-20">Tanggal</label>
-                        <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} className="w-full sm:w-auto border px-3 py-2 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500" />
+                        <input type="date" id="date" name="date" value={date} onChange={e => setDate(e.target.value)} disabled={isReadOnly} className="w-full sm:w-auto border px-3 py-2 rounded-xl text-sm font-semibold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed" />
                     </div>
-                    <button onClick={handleSave} disabled={loading} className="w-full sm:w-auto bg-blue-600 text-white px-5 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-70">
-                        <Save className="w-4 h-4"/>{loading ? "Menyimpan..." : "Simpan Absensi"}
+                    <button onClick={handleSave} disabled={loading || isReadOnly} className="w-full sm:w-auto bg-blue-600 text-white px-5 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all disabled:opacity-70 disabled:cursor-not-allowed">
+                        <Save className="w-4 h-4"/>{loading ? "Menyimpan..." : isReadOnly ? "Tidak bisa edit (TU - Read only)" : "Simpan Absensi"}
                     </button>
                 </div>
             </div>
@@ -133,9 +137,10 @@ export default function AbsensiGuruPage() {
                                             const isActive = attendance[t._id]?.status === s.id;
                                             return (
                                                 <button key={s.id} onClick={() => {
+                                                    if(isReadOnly) return;
                                                     const newNotes = s.id === "hadir" ? "" : attendance[t._id]?.notes;
                                                         setAttendance({...attendance, [t._id]: {...attendance[t._id], status: s.id, notes: newNotes}});
-                                                }} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border ${isActive ? s.activeClass : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"}`}>
+                                                }} disabled={isReadOnly} className={`px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all border disabled:cursor-not-allowed ${isActive ? s.activeClass : "bg-white text-slate-400 border-slate-200 hover:border-slate-300 hover:bg-slate-50"} ${isReadOnly ? "opacity-60" : ""}`}>
                                                     {s.label}
                                                 </button>
                                             )
@@ -144,7 +149,7 @@ export default function AbsensiGuruPage() {
                                 </td>
                                 <td className="px-3 py-4 sm:px-6 sm:py-4">
                                     <label htmlFor="notes"></label>
-                                    <input type="text" id="notes" name="notes" placeholder={attendance[t._id]?.status === "hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={attendance[t._id]?.notes || ""} onChange={e => setAttendance({...attendance, [t._id]: {...attendance[t._id], notes: e.target.value}})} disabled={attendance[t._id]?.status === "hadir"} className={`w-full border rounded-lg outline-none text-xs p-2.5 transition-colors ${attendance[t._id]?.status === "hadir" ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
+                                    <input type="text" id="notes" name="notes" placeholder={attendance[t._id]?.status === "hadir" ? "Tidak perlu catatan" : "Tulis alasan..."} value={attendance[t._id]?.notes || ""} onChange={e => setAttendance({...attendance, [t._id]: {...attendance[t._id], notes: e.target.value}})} disabled={attendance[t._id]?.status === "hadir" || isReadOnly} className={`w-full border rounded-lg outline-none text-xs p-2.5 transition-colors ${attendance[t._id]?.status === "hadir" || isReadOnly ? "bg-slate-100 border-transparent text-slate-400 cursor-not-allowed font-medium" : "bg-white border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-700"}`} />
                                 </td>
                             </tr>
                         )))}

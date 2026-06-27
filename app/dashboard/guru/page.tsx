@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
-import { getTeacher, saveTeacher, deleteTeacher } from "@/components/lib/actions";
-import { User as UserIcon, Pencil, Trash2, X, PlusCircle, Eye } from "lucide-react";
+import { getTeacher, saveTeacher, deleteTeacher, getKepsek, getGuruOnly, updateKepsek, deleteKepsek } from "@/components/lib/actions";
+import { User as UserIcon, Pencil, Trash2, X, PlusCircle, Eye, Crown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Swal from "sweetalert2";
 
@@ -27,6 +27,7 @@ export default function DataGuruPage() {
     const {data: session} = useSession();
     const userRole = (session?.user as any)?.role;
     const [teachers, setTeachers] = useState<Teacher[]>([]);
+    const [kepsek, setKepsek] = useState<any>(null);
     const [selectedTeacher, setSelectedTeacher] = useState<any>(null);
     const [isModalOpen, setModalOpen] = useState(false);
     const [photoBase64, setPhotoBase64] = useState("");
@@ -37,10 +38,14 @@ export default function DataGuruPage() {
     const formFieldSelectClass = `${formFieldClass} cursor-pointer`;
     
     useEffect(() => {
-        const loadTeachers = async() => {
-            setTeachers(await getTeacher());
+        const loadData = async() => {
+            const gurusData = await getGuruOnly();
+            const kepsekData = await getKepsek();
+            
+            setTeachers(gurusData);
+            setKepsek(kepsekData);
         };
-        loadTeachers();
+        loadData();
     }, []);
 
     const handleEdit = (teacher:any) => {
@@ -98,8 +103,10 @@ export default function DataGuruPage() {
                     },
                 });
             } else {
-                const freshTeacher = await getTeacher();
-                setTeachers(freshTeacher);
+                const freshGuru = await getGuruOnly();
+                const freshKepsek = await getKepsek();
+                setTeachers(freshGuru);
+                setKepsek(freshKepsek);
                 await Swal.fire({
                     title: "Berhasil!",
                     text: `Data guru "${name}" berhasil dihapus`,
@@ -228,13 +235,162 @@ export default function DataGuruPage() {
         return (parts[0][0] + parts[1][0]).toUpperCase();
     };
 
+    const handleSetKepsek = async (teacherId: string, teacherName: string) => {
+        const result = await Swal.fire({
+            title: "Tetapkan Kepala Sekolah?",
+            text: `Apakah anda yakin ingin menetapkan "${teacherName}" sebagai kepala sekolah?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3b82f6",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Ya, Tetapkan!",
+            cancelButtonText: "Batal",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                setLoading(true);
+                Swal.fire({
+                    title: "Memproses...",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                await updateKepsek(teacherId);
+                const freshKepsek = await getKepsek();
+                const freshGuru = await getGuruOnly();
+                setKepsek(freshKepsek);
+                setTeachers(freshGuru);
+
+                await Swal.fire({
+                    title: "Berhasil!",
+                    text: `"${teacherName}" telah ditetapkan sebagai kepala sekolah`,
+                    icon: "success",
+                    confirmButtonColor: "#3b82f6",
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
+            } catch (error) {
+                console.error(error);
+                await Swal.fire({
+                    title: "Gagal!",
+                    text: "Terjadi kesalahan saat menetapkan kepala sekolah",
+                    icon: "error",
+                    confirmButtonColor: "#3b82f6",
+                });
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
+    const handleDeleteKepsek = async () => {
+        const result = await Swal.fire({
+            title: "Hapus Kepala Sekolah?",
+            text: `Apakah anda yakin ingin menghapus posisi kepala sekolah?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#ef4444",
+            cancelButtonColor: "#6b7280",
+            confirmButtonText: "Ya, Hapus!",
+            cancelButtonText: "Batal",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                setLoading(true);
+                Swal.fire({
+                    title: "Memproses...",
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                });
+
+                await deleteKepsek();
+                const freshKepsek = await getKepsek();
+                const freshGuru = await getGuruOnly();
+                setKepsek(freshKepsek);
+                setTeachers(freshGuru);
+
+                await Swal.fire({
+                    title: "Berhasil!",
+                    text: "Posisi kepala sekolah telah dihapus",
+                    icon: "success",
+                    confirmButtonColor: "#3b82f6",
+                    timer: 2000,
+                    timerProgressBar: true,
+                });
+            } catch (error) {
+                console.error(error);
+                await Swal.fire({
+                    title: "Gagal!",
+                    text: "Terjadi kesalahan saat menghapus kepala sekolah",
+                    icon: "error",
+                    confirmButtonColor: "#3b82f6",
+                });
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
+
     return (
         <div className="space-y-6">
-            <div className="flex justify-between items-end">
-                <div>
-                    <h1 className="text-2xl font-bold text-foreground">Data Guru</h1>
-                    <p className="text-muted-foreground text-sm mt-1">Kelola akun dan profile guru yang terhormat</p>
-                </div>
+            <div>
+                <h1 className="text-2xl font-bold text-foreground">Data Guru</h1>
+                <p className="text-muted-foreground text-sm mt-1">Kelola akun dan profile guru yang terhormat</p>
+            </div>
+            <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4 w-full">
+                {/* Kepsek Card - Only for Admin */}
+                {userRole === "admin" && (
+                    <div className="flex-1">
+                        {kepsek ? (
+                            <div className="bg-linear-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-xl p-3 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div className="flex items-center gap-3">
+                                    {kepsek.profilePicture ? (
+                                        <Image src={kepsek.profilePicture} alt={kepsek.name} width={40} height={40} className="w-10 h-10 rounded-full object-cover border border-amber-200 shrink-0" unoptimized/>
+                                    ) : (
+                                        <div className="w-10 h-10 bg-amber-200 rounded-full flex items-center justify-center font-bold text-amber-900 text-xs shrink-0">
+                                            {getInitials(kepsek.name)}
+                                        </div>
+                                    )}
+                                    <div className="min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-bold text-amber-900 text-sm truncate">{kepsek.name}</p>
+                                            <span className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-bold bg-amber-200 text-amber-800 rounded-md">Kepala Sekolah</span>
+                                        </div>
+                                        <p className="text-xs text-amber-700 truncate">{kepsek.email}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between sm:justify-end gap-3 border-t sm:border-t-0 pt-2 sm:pt-0 border-amber-200/60">
+                                    <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-100/70 px-2 py-1 rounded-md font-medium">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"/>
+                                        Status: {kepsek.status}
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => setViewingTeacher(kepsek)} title="Lihat detail kepala sekolah" className="p-1.5 hover:bg-amber-200 rounded-lg transition">
+                                            <Eye className="w-4 h-4 text-amber-700"/>
+                                        </button>
+                                        <button onClick={() => handleEdit(kepsek)} title="edit data kepala sekolah" className="p-1.5 hover:bg-amber-200 rounded-lg transition">
+                                            <Pencil className="w-4 h-4 text-amber-700"/>
+                                        </button>
+                                        <button onClick={handleDeleteKepsek} className="bg-red-500 hover:bg-red-600 text-white font-semibold px-3 py-1.5 rounded-lg transition text-xs">
+                                            Hapus Posisi
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="bg-amber-50/50 border border-dashed border-amber-300 rounded-xl p-3.5 text-xs text-amber-800 flex items-center gap-2">
+                                <span>Belum ada kepala sekolah yang ditetapkan. Pilih salah satu guru dari daftar di bawah untuk menetapkan.</span>
+                            </div>
+                        )}
+                    </div>
+                )}
+                <div></div>
                 {userRole === "admin" && (
                     <button title="modalOpen" onClick={handleAddNew} className="flex items-center justify-center gap-2.5 bg-[#0f2bff] text-white font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-primary/20 hover:bg-[#1518c7] hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 ease-in-out active:scale-95">
                         <PlusCircle color="currentColor" size={22} strokeWidth={2.5}/>
@@ -282,9 +438,12 @@ export default function DataGuruPage() {
                                 </td>
                                 {userRole === "admin" && (
                                     <td className="px-6 py-4">
-                                        <div className="flex gap-2 justify-center">
+                                        <div className="flex gap-2 justify-center flex-wrap">
+                                            <button title="set-kepsek" onClick={() => handleSetKepsek(t._id, t.name)} className="p-2 text-white hover:text-primary bg-amber-500 hover:bg-amber-600 rounded-lg transition">
+                                                <Crown className="w-4 h-4"></Crown>
+                                            </button>
                                             <button title="edit" onClick={() => handleEdit(t)} className="p-2 text-white hover:text-primary bg-[#223cff] hover:bg-[#5e66ff] rounded-lg transition">
-                                                <Pencil className="wa-4 h-4"></Pencil>
+                                                <Pencil className="w-4 h-4"></Pencil>
                                             </button>
                                             <button title="delete" onClick={() => handleDelete(t._id, t.name)} className="p-2 text-white hover:text-destructive bg-[#ff2929] hover:bg-[#ff4b4b] rounded-lg transition">
                                                 <Trash2 className="h-4 w-4"></Trash2>
@@ -297,120 +456,6 @@ export default function DataGuruPage() {
                                         <Eye className="w-5 h-5"></Eye>
                                     </button>
                                 </td>
-                                <AnimatePresence>
-                                {viewingTeacher && (
-                                    <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                                        <motion.div className="bg-card w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ duration: 0.25, ease: "easeOut" }}>
-                                            <div className="bg-linear-to-r from-primary bg-[#2036ff] to-primary-foreground/80 p-6 flex justify-between items-center text-white">
-                                                <div className="flex items-center gap-4">
-                                                    <button type="button" onClick={handleDetailPhotoClick} className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-card shadow-md flex items-center justify-center transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-400">
-                                                        {viewingTeacher.profilePicture ? (
-                                                            <Image src={viewingTeacher.profilePicture} alt="Profile" width={64} height={64} className="w-16 h-16 rounded-full object-cover" unoptimized />
-                                                        ) : (
-                                                            <div className="w-16 h-16 rounded-full bg-card/20 flex items-center justify-center text-card-foreground text-2xl font-bold border-2 border-card/50">
-                                                                {viewingTeacher.name.charAt(0)}
-                                                            </div>
-                                                        )}
-                                                        <span className="absolute inset-0 bg-black/0 hover:bg-black/10 rounded-full"></span>
-                                                    </button>
-                                                    <div>
-                                                        <h2 className="text-xl font-bold">{viewingTeacher.name}</h2>
-                                                        <p className="text-primary-foreground/80 text-sm font-medium">{viewingTeacher.jabatan || "Guru"}  {viewingTeacher.idGuru || "-"}</p>
-                                                    </div>
-                                                </div>
-                                                <button onClick={() => setViewingTeacher(null)} className="p-2 hover:bg-card/20 rounded-full transition" title="X"><X className="w-6 h-6"></X></button>
-                                            </div>
-                                            <div className="p-6 max-h-[70vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm bg-[#ffffff]">
-                                                <div className="space-y-4">
-                                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Profile Guru</h3>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <span className="text-muted-foreground">TTL</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.tempatLahir || "-"}, {viewingTeacher.tanggalLahir}</span>
-                                                        <span className="text-muted-foreground">Gender</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jenisKelamin || "-"}</span>
-                                                        <span className="text-muted-foreground">No. WhatsApp</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.noTelp || "-"}</span>
-                                                        <span className="text-muted-foreground">Pendidikan Terakhir</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher?.pendidikan || "-"}</span>
-                                                        <span className="text-muted-foreground">Email Akun</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.email || "-"}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-4">
-                                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Data Kedinasan</h3>
-                                                    <div className="grid grid-cols-3 gap-2">
-                                                        <span className="text-muted-foreground">Status Pegawai</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: <span className="bg-success/10 text-success px-2 py-0.5 rounded-md">{viewingTeacher.statusKepegawaian || "-"}</span></span>
-                                                        <span className="text-muted-foreground">Golongan/Ruang</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.golongan || "-"}</span>
-                                                        <span className="text-muted-foreground">Jabatan Struktural</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jabatanStruktural || "-"}</span>
-                                                        {viewingTeacher.jabatanStruktural === "Guru Kelas" && (
-                                                            <>
-                                                                <span className="text-muted-foreground">Mengampu kelas</span>
-                                                                <span className="col-span-2 font-semibold text-primary">: {viewingTeacher.kelas} {viewingTeacher.rombel}</span>
-                                                            </>
-                                                        )}
-                                                        {viewingTeacher.jabatanStruktural === "Guru Mapel" && (
-                                                            <>
-                                                                <span className="text-muted-foreground">Mata Pelajaran</span>
-                                                                <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.mataPelajaran || "-"}</span>
-                                                            </>
-                                                        )}
-                                                        <span className="text-muted-foreground">Jabatan Fungsional</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jabatanFungsional || "-"}</span>
-                                                        <span className="text-muted-foreground">TMT Mengajar</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.tmtMengajar || "-"}</span>
-                                                        <span className="text-muted-foreground">NIP</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.nip || "-"}</span>
-                                                        <span className="text-muted-foreground">NUPTK</span>
-                                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.nuptk || "-"}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="md:col-span-2 space-y-4 pt-2">
-                                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Alamat Domisili</h3>
-                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                        <div>
-                                                            <p className="text-muted-foreground text-xs mb-1">Alamat Jalan</p>
-                                                            <p className="font-semibold text-foreground">{viewingTeacher.alamatLengkap || "-"}</p>
-                                                        </div>
-                                                        <div className="grid grid-cols-2 gap-4">
-                                                            <div>
-                                                                <p className="text-muted-foreground text-xs mb-1">Desa/Kelurahan</p>
-                                                                <p className="font-semibold text-foreground">{viewingTeacher.desa || "-"}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-muted-foreground text-xs mb-1">Kecamatan</p>
-                                                                <p className="font-semibold text-foreground">{viewingTeacher.kecamatan || "-"}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-muted-foreground text-xs mb-1">Kabupaten/Kota</p>
-                                                                <p className="font-semibold text-foreground">{viewingTeacher.kabupaten || "-"}</p>
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-muted-foreground text-xs mb-1">Provinsi</p>
-                                                                <p className="font-semibold text-foreground">{viewingTeacher.provinsi}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                        <AnimatePresence>
-                                            {previewImage && (
-                                                <motion.div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                    <motion.div className="relative bg-card rounded-3xl overflow-hidden shadow-2xl w-full max-w-3xl" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2 }}>
-                                                        <button title="previewImage" type="button" onClick={() => setPreviewImage(null)} className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 text-slate-900 shadow-sm hover:bg-white transition">
-                                                            <X className="w-5 h-5" />
-                                                        </button>
-                                                        <Image src={previewImage} alt="Preview Foto Guru" className="w-full max-h-[80vh] object-contain bg-black" />
-                                                    </motion.div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </motion.div>
-                                )}
-                                </AnimatePresence>
                             </tr>
                         ))}
                         {teachers.length === 0 && (
@@ -420,8 +465,122 @@ export default function DataGuruPage() {
                 </table>
             </div>
             <AnimatePresence>
+                {viewingTeacher && (
+                    <motion.div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                        <motion.div className="bg-card w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ duration: 0.25, ease: "easeOut" }}>
+                            <div className="bg-linear-to-r from-primary bg-[#2036ff] to-primary-foreground/80 p-6 flex justify-between items-center text-white">
+                                <div className="flex items-center gap-4">
+                                    <button type="button" onClick={handleDetailPhotoClick} className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-card shadow-md flex items-center justify-center transition hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-400">
+                                        {viewingTeacher.profilePicture ? (
+                                            <Image src={viewingTeacher.profilePicture} alt="Profile" width={64} height={64} className="w-16 h-16 rounded-full object-cover" unoptimized />
+                                        ) : (
+                                            <div className="w-16 h-16 rounded-full bg-card/20 flex items-center justify-center text-card-foreground text-2xl font-bold border-2 border-card/50">
+                                                {viewingTeacher.name.charAt(0)}
+                                            </div>
+                                        )}
+                                        <span className="absolute inset-0 bg-black/0 hover:bg-black/10 rounded-full"></span>
+                                    </button>
+                                    <div>
+                                        <h2 className="text-xl font-bold">{viewingTeacher.name}</h2>
+                                        <p className="text-primary-foreground/80 text-sm font-medium">{viewingTeacher.jabatan || "Guru"}  {viewingTeacher.idGuru || "-"}</p>
+                                    </div>
+                                </div>
+                                <button onClick={() => setViewingTeacher(null)} className="p-2 hover:bg-card/20 rounded-full transition" title="X"><X className="w-6 h-6"></X></button>
+                            </div>
+                            <div className="p-6 max-h-[70vh] overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-sm bg-[#ffffff]">
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Profile Guru</h3>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <span className="text-muted-foreground">TTL</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.tempatLahir || "-"}, {viewingTeacher.tanggalLahir}</span>
+                                        <span className="text-muted-foreground">Gender</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jenisKelamin || "-"}</span>
+                                        <span className="text-muted-foreground">No. WhatsApp</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.noTelp || "-"}</span>
+                                        <span className="text-muted-foreground">Pendidikan Terakhir</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher?.pendidikan || "-"}</span>
+                                        <span className="text-muted-foreground">Email Akun</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.email || "-"}</span>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Data Kedinasan</h3>
+                                    <div className="grid grid-cols-3 gap-2">
+                                        <span className="text-muted-foreground">Status Pegawai</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: <span className="bg-emerald/10 text-emerald px-2 py-0.5 rounded-md">{viewingTeacher.statusKepegawaian || "-"}</span></span>
+                                        <span className="text-muted-foreground">Golongan/Ruang</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.golongan || "-"}</span>
+                                        <span className="text-muted-foreground">Jabatan Struktural</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jabatanStruktural || "-"}</span>
+                                        {viewingTeacher.jabatanStruktural === "Guru Kelas" && (
+                                            <>
+                                                <span className="text-muted-foreground">Mengampu kelas</span>
+                                                <span className="col-span-2 font-semibold text-primary">: {viewingTeacher.kelas} {viewingTeacher.rombel}</span>
+                                            </>
+                                        )}
+                                        {viewingTeacher.jabatanStruktural === "Guru Mapel" && (
+                                            <>
+                                                <span className="text-muted-foreground">Mata Pelajaran</span>
+                                                <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.mataPelajaran || "-"}</span>
+                                            </>
+                                        )}
+                                        <span className="text-muted-foreground">Jabatan Fungsional</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.jabatanFungsional || "-"}</span>
+                                        <span className="text-muted-foreground">TMT Mengajar</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.tmtMengajar || "-"}</span>
+                                        <span className="text-muted-foreground">NIP</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.nip || "-"}</span>
+                                        <span className="text-muted-foreground">NUPTK</span>
+                                        <span className="col-span-2 font-semibold text-foreground">: {viewingTeacher.nuptk || "-"}</span>
+                                    </div>
+                                </div>
+                                <div className="md:col-span-2 space-y-4 pt-2">
+                                    <h3 className="font-bold text-foreground border-b pb-2 text-base">Alamat Domisili</h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div>
+                                            <p className="text-muted-foreground text-xs mb-1">Alamat Jalan</p>
+                                            <p className="font-semibold text-foreground">{viewingTeacher.alamatLengkap || "-"}</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p className="text-muted-foreground text-xs mb-1">Desa/Kelurahan</p>
+                                                <p className="font-semibold text-foreground">{viewingTeacher.desa || "-"}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-muted-foreground text-xs mb-1">Kecamatan</p>
+                                                <p className="font-semibold text-foreground">{viewingTeacher.kecamatan || "-"}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-muted-foreground text-xs mb-1">Kabupaten/Kota</p>
+                                                <p className="font-semibold text-foreground">{viewingTeacher.kabupaten || "-"}</p>
+                                            </div>
+                                            <div>
+                                                <p className="text-muted-foreground text-xs mb-1">Provinsi</p>
+                                                <p className="font-semibold text-foreground">{viewingTeacher.provinsi}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                        <AnimatePresence>
+                            {previewImage && (
+                                <motion.div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/50" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                                    <motion.div className="relative bg-card rounded-3xl overflow-hidden shadow-2xl w-full max-w-3xl" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2 }}>
+                                        <button title="previewImage" type="button" onClick={() => setPreviewImage(null)} className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/90 text-slate-900 shadow-sm hover:bg-white transition">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                        <Image src={previewImage} alt="Preview Foto Guru" className="w-full max-h-[80vh] object-contain bg-black" />
+                                    </motion.div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <AnimatePresence>
             {isModalOpen && (
-                <motion.div className="fixed inset-0 bg-/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+                <motion.div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
                     <motion.div className="bg-card rounded-xl shadow-2xl max-w-3xl w-full p-6 border border-border max-h-[85vh] overflow-y-auto relative" initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} transition={{ duration: 0.25, ease: "easeOut" }}>
                         <button title="X" onClick={() => setModalOpen(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground rounded-full p-1 hover:bg-muted transition">
                             <X className="w-4 h-4"></X>
@@ -479,6 +638,7 @@ export default function DataGuruPage() {
                                             <select name="role" id="role" required className={formFieldSelectClass}>
                                                 <option value="guru">Guru</option>
                                                 <option value="kepsek">Kepala Sekolah</option>
+                                                <option value="tu">Tata Usaha</option>
                                             </select>
                                         </div>
                                     </div>
@@ -540,7 +700,7 @@ export default function DataGuruPage() {
                                                     if(kls) kls.value = "";
                                                     if(rmb) rmb.value = "";
                                                 }}} className={formFieldSelectClass}>
-                                                {["Guru Kelas", "Guru Mapel", "Guru Ekskul", "Kepala Sekolah"].map(s => <option key={s} value={s}>{s}</option>)}
+                                                {["Guru Kelas", "Guru Mapel", "Guru Ekskul", "Tata Usaha", "Kepala Sekolah"].map(s => <option key={s} value={s}>{s}</option>)}
                                             </select>
                                         </div>
                                         <div>
