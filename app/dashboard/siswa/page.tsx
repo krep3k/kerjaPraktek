@@ -464,6 +464,11 @@ export default function SiswaPage() {
                     <table className="w-full text-left text-sm text-gray-600 min-w-200 whitespace-nowrap">
                         <thead className="bg-[#2735ff] border-b border-gray-200 text-white uppercase font-semibold">
                             <tr>
+                                {isAdmin && (
+                                    <th className="px-4 py-4 w-12 text-center">
+                                        <input type="checkbox" title="pilih semua" checked={students.length > 0 && selectedIds.length === students.length} onChange={handleSelectAll} className="w-4 h-4 accent-blue-600 rounded cursor-pointer" />
+                                    </th>
+                                )}
                                 <th className="px-6 py-4 w-16">No</th>
                                 <th className="px-6 py-4">NIS</th>
                                 <th className="px-6 py-4">NISN</th>
