@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { getStudentsFiltered, addStudents, updateStudents, deleteStudent, searchStudents, getTeacher, getWaliKelas, setWaliKelas, getKepsek } from "@/components/lib/actions";
-import { PlusCircle, Edit, Trash2, X, Search, UserIcon } from "lucide-react";
+import { PlusCircle, Edit, Trash2, X, Search, UserIcon, CheckSquare, Layers } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import Swal from "sweetalert2";
 
@@ -18,6 +18,9 @@ export default function SiswaPage() {
     const availableRombels = (filterKelas <= 4) ? ["A", "B", "C"] : ["A", "B"];
     const [showModal, setShowModal] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [bulkKelas, setBulkKelas] = useState<number>(1);
+    const [bulkRombel, setBulkRombel] = useState<string>("A");
     const [formData, setFormData] = useState({
         nis: "", nisn: "", name: "", gender: "L", kelas: 1, rombel: "A", status: "aktif"
     });
@@ -76,11 +79,17 @@ export default function SiswaPage() {
             try {
                 if(searchQuery.trim() !== "") {
                     const data = await searchStudents(searchQuery);
-                    if(isMounted) setStudents(data);
+                    if(isMounted) {
+                        setStudents(data);
+                        setSelectedIds([]);
+                    }
                 } else {
                     const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
                     const data = await getStudentsFiltered(filterKelas, normalizedRombel);
-                    if(isMounted) setStudents(data);
+                    if(isMounted) {
+                        setStudents(data);
+                        setSelectedIds([]);
+                    }
                 }
             } catch (error) {
                 console.error("Gagal memuat data siswa", error);
@@ -98,6 +107,11 @@ export default function SiswaPage() {
         }
         return () => {isMounted = false};
     }, [filterKelas, filterRombel, searchQuery]);
+
+    useEffect(() => {
+        setBulkKelas(filterKelas);
+        setBulkRombel(filterRombel);
+    }, [filterKelas, filterRombel]);
 
     const handleWaliKelasChange = async(e: React.ChangeEvent<HTMLSelectElement>) => {
         const teacherId = e.target.value;
@@ -127,6 +141,81 @@ export default function SiswaPage() {
         }
         setShowModal(true);
     };
+
+    const handleSelectStudent = (id: string) => {
+        setSelectedIds(prev => prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]);
+    };
+
+    const handleSelectAll = () => {
+        if(selectedIds.length === students.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(students.map(s => s._id));
+        }
+    };
+
+    const handleBulkUpdate = async() => {
+        if(selectedIds.length === 0) return;
+        const result = await Swal.fire({
+            title: "Proses Kenaikan Kelas Massal?",
+            text: `Apakah Anda yakin ingin memindahkan ${selectedIds.length} siswa terpilih ke Kelas ${bulkKelas} - ${bulkRombel}?`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3b82f6",
+            cancelButtonColor: "#9ca3af",
+            confirmButtonText: "Ya, Pindahkan!",
+            cancelButtonText: "Batal"
+        });
+
+        if(result.isConfirmed) {
+            Swal.fire({
+                title: 'Memproses Pemindahan...',
+                text: 'Mohon tunggu sampai semua data berhasil diperbarui.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            try {
+                for(const id of selectedIds) {
+                    const currentStudent = students.find(s => s._id === id);
+                    if(currentStudent) {
+                        const updatedData = {
+                            nis: currentStudent.nis,
+                            nisn: currentStudent.nisn || "",
+                            name: currentStudent.name,
+                            gender: currentStudent.gender || "L",
+                            status: currentStudent.status,
+                            kelas: bulkKelas,     // Menggunakan nilai kelas baru
+                            rombel: bulkRombel,   // Menggunakan nilai rombel baru
+                        };
+                        await updateStudents(id, updatedData);
+                    }
+                }
+                const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
+                const data = await getStudentsFiltered(filterKelas, normalizedRombel);
+                setStudents(data);
+                setSelectedIds([]);
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Kenaikan/pemindahan kelas massal berhasil diproses.',
+                    icon: 'success',
+                    confirmButtonColor: '#3b82f6',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            } catch(error) {
+                console.error("Gagal melakukan aksi massal:", error);
+                await Swal.fire({
+                    title: 'Terjadi Kesalahan!',
+                    text: 'Gagal memperbarui beberapa data siswa. Silakan periksa kembali data Anda.',
+                    icon: 'error',
+                    confirmButtonColor: '#3b82f6'
+                });
+            }
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         Swal.fire({
@@ -331,6 +420,34 @@ export default function SiswaPage() {
                     </select>
                 </div>
             </div>
+            <AnimatePresence>
+                {isAdmin && selectedIds.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col md:flex-row justify-between items-center gap-4 shadow-md">
+                        <div className="flex items-center gap-2 text-indigo-900 font-medium">
+                            <CheckSquare className="w-5 h-5 text-indigo-600"/>
+                            <span>Terpilih <strong>{selectedIds.length}</strong> siswa untuk dipindahkan / naik kelas secara massal</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <div className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-lg border border-indigo-200 shadow-sm">
+                                <Layers className="w-4 h-4 text-indigo-500"/>
+                                <select title="Pilih Kelas Tujuan Massal" value={bulkKelas} onChange={(e) => setBulkKelas(Number(e.target.value))} className="bg-transparent text-sm font-semibold text-indigo-900 focus:outline-none cursor-pointer">
+                                    {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Ke Kelas {k}</option>)}
+                                </select>
+                                <span className="text-gray-300">|</span>
+                                <select title="Pilih Rombel Tujuan Massal" value={bulkRombel} onChange={(e) => setBulkRombel(e.target.value)} className="bg-transparent text-sm font-semibold text-indigo-900 focus:outline-none cursor-pointer">
+                                    {["A", "B", "C"].map(r => <option key={r} value={r}>Rombel {r}</option>)}
+                                </select>
+                            </div>
+                            <button onClick={handleBulkUpdate} className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition shadow">
+                                Proses
+                            </button>
+                            <button onClick={() => setSelectedIds([])} className="text-gray-500 hover:text-gray-700 text-sm font-medium px-2 py-2">
+                                Batal
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
             <div className="bg-white border border-gray-200 rounded-xl overflow-x-auto shadow-sm w-full">
                 {loading ? <div className="p-10 text-center">Memuat data...</div> : (
                     <motion.div initial={{
@@ -360,9 +477,14 @@ export default function SiswaPage() {
                         </thead>
                         <tbody>
                             {students.length === 0 ? (
-                                <tr><td colSpan={7} className="p-6 text-center text-gray-400">Tidak ada data siswa</td></tr>
+                                <tr><td colSpan={isAdmin ? 10 : 9} className="p-6 text-center text-gray-400">Tidak ada data siswa</td></tr>
                             ) : students.map((siswa, index) => (
                                 <tr key={siswa._id} className="border-b border-gray-100 hover:bg-gray-50">
+                                    {isAdmin && (
+                                        <td className="px-4 py-4 text-center">
+                                            <input type="checkbox" title={`Pilih ${siswa.name}`} checked={selectedIds.includes(siswa._id)} onChange={() => handleSelectStudent(siswa._id)} className="w-4 h-4 accent-blue-600 rounded cursor-pointer" />
+                                        </td>
+                                    )}
                                     <td className="px-6 py-4">{index + 1}</td>
                                     <td className="px-6 py-4 tabular-nums">{siswa.nis}</td>
                                     <td className="px-6 py-4 tabular-nums">{siswa.nisn || "-"}</td>
