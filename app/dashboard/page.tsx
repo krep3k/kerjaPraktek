@@ -6,14 +6,14 @@ import { Users, UserCheck, GraduationCap, LayoutDashboard, ClipboardList, BookCh
 import { getDashboardStats } from "@/components/lib/actions";
 
 const dashboardNavs = [
-    { name: "Data Siswa", href: "/dashboard/siswa", icon: Users, roles: ["admin", "guru", "kepsek"], description: "Kelola data siswa dan lihat informasi lengkap." },
-    { name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "tu", "kepsek"], description: "Kelola data guru dan hak akses mereka." },
+    { name: "Data Siswa", href: "/dashboard/siswa", icon: Users, roles: ["admin", "guru", "kepsek", "tu"], description: "Kelola data siswa dan lihat informasi lengkap." },
+    { name: "Data Guru", href: "/dashboard/guru", icon: User2Icon, roles: ["admin", "tu", "kepsek", "tu"], description: "Kelola data guru dan hak akses mereka." },
     { name: "Absensi Guru", href: "/dashboard/absensi-guru", icon: ClipboardCheckIcon, roles: ["admin", "kepsek"], description: "Lihat dan rekap absensi guru." },
     { name: "Absensi Siswa", href: "/dashboard/absensi", icon: ClipboardList, roles: ["admin", "guru"], description: "Catat kehadiran siswa harian secara cepat." },
     { name: "Nilai", href: "/dashboard/nilai", icon: NotebookPen, roles: ["admin", "guru"], description: "Masukkan dan tinjau nilai siswa." },
-    { name: "Rekapitulasi Siswa", href: "/dashboard/rekap", icon: BookCheck, roles: ["admin", "guru"], description: "Lihat rekap absensi dan nilai siswa." },
-    { name: "Rekapitulasi Guru", href: "/dashboard/rekap-absensi-guru", icon: BookOpenCheck, roles: ["admin", "kepsek"], description: "Lihat rekap bulanan absensi guru." },
-    { name: "Bank Data", href: "/dashboard/gudang", icon: FolderKanban, roles: ["admin", "guru", "kepsek"], description: "Akses bank data dokumen dan file penting." },
+    { name: "Rekapitulasi Siswa", href: "/dashboard/rekap", icon: BookCheck, roles: ["admin", "guru", "tu"], description: "Lihat rekap absensi dan nilai siswa." },
+    { name: "Rekapitulasi Guru", href: "/dashboard/rekap-absensi-guru", icon: BookOpenCheck, roles: ["admin", "kepsek", "tu"], description: "Lihat rekap bulanan absensi guru." },
+    { name: "Bank Data", href: "/dashboard/gudang", icon: FolderKanban, roles: ["admin", "guru", "kepsek", "tu"], description: "Akses bank data dokumen dan file penting." },
 ];
 
 export default async function DashboardPage() {
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
                     <NavCard key={nav.name} href={nav.href} icon={nav.icon} title={nav.name} description={nav.description} />
                 ))}
             </div>
-            {userRole === "admin" && (
+            {["admin", "tu"].includes(userRole) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <StatCard title="Guru Aktif" value={stats.totalGuru} icon={UserCheck} color="text-[#81CAD6]" bgColor="bg-[#81CAD6]/10"/>
                     <StatCard title="Total Siswa" value={stats.totalSiswa} icon={Users} color="text-[#EDCD44]" bgColor="bg-[#EDCD44]/10"/>
