@@ -1,15 +1,19 @@
 "use client";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { School, Mail, Lock, LogIn, ArrowLeft } from "lucide-react";
 
 export default function LoginPage(){
     const namaSekolah = "SDN SERUA 02";
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+    const idleMessage = searchParams.get("reason") === "idle"
+        ? "Sesi Anda telah berakhir karena tidak ada aktivitas selama 1 jam. Silakan login kembali."
+        : "";
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -70,6 +74,12 @@ export default function LoginPage(){
                             <h2 className="text-3xl font-black text-[#2D2735] mb-2">Login</h2>
                             <p className="text-[#6E6B7F] font-bold text-sm">Masuk dengan Akun yang Tersedia</p>
                         </div>
+                        {idleMessage && (
+                            <div className="mb-6 p-4 bg-[#EDCD44]/20 border border-[#EDCD44]/40 text-[#2D2735] rounded-2xl text-xs font-bold flex items-center gap-2">
+                                <span className="w-2 h-2 bg-[#EDCD44] rounded-full animate-pulse shrink-0"></span>
+                                {idleMessage}
+                            </div>
+                        )}
                         {error && (
                             <div className="mb-6 p-4 bg-[#DC3E26]/10 border border-[#DC3E26]/20 text-[#DC3E26] rounded-2xl text-xs font-bold flex items-center gap-2">
                                 <span className="w-2 h-2 bg-[#DC3E26] rounded-full animate-pulse shrink-0"></span>

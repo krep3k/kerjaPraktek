@@ -14,7 +14,7 @@ function AutoLogout({ children }: { children: React.ReactNode }) {
                 window.clearTimeout(timerRef.current);
             }
             timerRef.current = window.setTimeout(() => {
-                signOut({ callbackUrl: "/login" });
+                signOut({ callbackUrl: "/login?reason=idle" });
             }, IDLE_TIMEOUT);
         };
 
