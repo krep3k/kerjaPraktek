@@ -2,10 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import { getStudentsFiltered, getAbsensiRecord, getGNilaiRecord, getStudentAttendanceMonthlyRecap, getStudentNilaiMonthlyRecap } from "@/components/lib/actions";
-import { Download, CheckSquare, BookOpen } from "lucide-react";
+import { Download, CheckSquare, BookOpen, AlertCircle } from "lucide-react";
 import { getMataPelajaranByKelas, getRombelByKelas } from "@/components/lib/constants";
-import { motion } from "motion/react";
-import Swal from "sweetalert2";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Student {
     _id: string;
@@ -71,6 +70,19 @@ export default function RekapDataPage() {
     const yearOptions = Array.from({ length: 11 }, (_, i) => {
         return new Date().getFullYear() - 5 + i;
     });
+
+    // --- STATE ANIMASI UNDUHAN KUSTOM ---
+    const [downloadStage, setDownloadStage] = useState<"idle" | "loading" | "toast">("idle");
+    const [downloadStatus, setDownloadStatus] = useState<"success" | "error">("success");
+    const [downloadErrorMsg, setDownloadErrorMsg] = useState("");
+
+    // --- TRANSISI KUSTOM BEZIER CURVE ---
+    const smoothTransition = { duration: 0.25, ease: [0.22, 1, 0.36, 1] as const };
+    const fadeScale = {
+        initial: { opacity: 0, scale: 0.95 },
+        animate: { opacity: 1, scale: 1 },
+        exit: { opacity: 0, scale: 0.95 }
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -199,76 +211,75 @@ export default function RekapDataPage() {
         }
     };
 
+    // --- LOGIKA UNDUHAN DENGAN ANIMASI ---
     const downloadCSV = () => {
         if(tableData.length === 0) {
-            Swal.fire({
-                title: 'Gagal Mengunduh!',
-                text: 'Tidak ada data untuk diunduh!',
-                icon: 'warning',
-                confirmButtonColor: '#3b82f6', // Menyesuaikan warna utama UI Anda
-                showClass: {
-                    popup: 'animate__animated animate__shakeX' // Efek bergetar karena validasi gagal
-                },
-            });
+            setDownloadStatus("error");
+            setDownloadErrorMsg("Tidak ada data untuk diunduh!");
+            setDownloadStage("toast");
+            setTimeout(() => setDownloadStage("idle"), 3000);
             return;
         }
 
-        let headers = [];
-        let rows = [];
-        let filename = "";
+        setDownloadStage("loading"); // Memunculkan overlay processing dokumen
+        
+        // Simulasi delay pembuatan berkas agar animasi terlihat
+        setTimeout(() => {
+            let headers = [];
+            let rows = [];
+            let filename = "";
 
-        if(activeTab === "absensi") {
-            if (reportPeriod === "daily") {
-                headers = ["NO", "NIS", "NAMA SISWA", "STATUS", "KETERANGAN"];
-                rows = tableData.map(row => `${row.no},${row.nis},"${row.nama}",${row.status},"${row.keterangan}"`);
-                filename = `Rekap_Absensi_Kelas_${kelas}${rombel}_${tanggal}.csv`;
+            if(activeTab === "absensi") {
+                if (reportPeriod === "daily") {
+                    headers = ["NO", "NIS", "NAMA SISWA", "STATUS", "KETERANGAN"];
+                    rows = tableData.map(row => `${row.no},${row.nis},"${row.nama}",${row.status},"${row.keterangan}"`);
+                    filename = `Rekap_Absensi_Kelas_${kelas}${rombel}_${tanggal}.csv`;
+                } else {
+                    headers = ["NO", "NIS", "NAMA SISWA", "HADIR", "SAKIT", "IZIN", "ALPHA"];
+                    rows = tableData.map(row => `${row.no},${row.nis},"${row.nama}",${row.hadir},${row.sakit},${row.izin},${row.alpha}`);
+                    filename = `Rekap_Absensi_Bulanan_Kelas_${kelas}${rombel}_${monthYear}.csv`;
+                }
             } else {
-                headers = ["NO", "NIS", "NAMA SISWA", "HADIR", "SAKIT", "IZIN", "ALPHA"];
-                rows = tableData.map(row => `${row.no},${row.nis},"${row.nama}",${row.hadir},${row.sakit},${row.izin},${row.alpha}`);
-                filename = `Rekap_Absensi_Bulanan_Kelas_${kelas}${rombel}_${monthYear}.csv`;
+                headers = ["NO", "NIS", "NAMA SISWA", "NILAI"];
+                rows = tableData.map(row => `${row.no},${row.nis},"${row.nama}",${row.nilai}`);
+                if (reportPeriod === "daily") {
+                    const jenisDisplay = isEkskulMapel ? `ekskul ${mapel}` : jenisNilai;
+                    filename = `Rekap_Nilai_${mapel}_${jenisDisplay}_Tanggal_${tanggal}_Kelas_${kelas}${rombel}_${semester}.csv`;
+                } else {
+                    const jenisDisplay = isEkskulMapel ? `ekskul ${mapel}` : jenisNilai;
+                    filename = `Rekap_Nilai_Bulanan_${mapel}_${jenisDisplay}_Bulan_${monthYear}_Kelas_${kelas}${rombel}_${semester}.csv`;
+                }
             }
-        } else {
-            headers = ["NO", "NIS", "NAMA SISWA", "NILAI"];
-            rows = tableData.map(row => `${row.no},${row.nis},"${row.nama}",${row.nilai}`);
-            if (reportPeriod === "daily") {
-                const jenisDisplay = isEkskulMapel ? `ekskul ${mapel}` : jenisNilai;
-                filename = `Rekap_Nilai_${mapel}_${jenisDisplay}_Tanggal_${tanggal}_Kelas_${kelas}${rombel}_${semester}.csv`;
-            } else {
-                const jenisDisplay = isEkskulMapel ? `ekskul ${mapel}` : jenisNilai;
-                filename = `Rekap_Nilai_Bulanan_${mapel}_${jenisDisplay}_Bulan_${monthYear}_Kelas_${kelas}${rombel}_${semester}.csv`;
-            }
-        }
-        const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", filename);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        Swal.fire({
-            title: 'Berhasil Diunduh!',
-            text: `File ekspor sedang diproses oleh browser Anda.`,
-            icon: 'success',
-            confirmButtonColor: '#3b82f6',
-            timer: 2000, // Menutup otomatis dalam 2 detik
-            timerProgressBar: true,
-            showClass: {
-                popup: 'animate__animated animate__bounceIn' // Efek bounce masuk yang mulus
-            }
-        });
+            
+            const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows].join("\n");
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            setDownloadStatus("success");
+            setDownloadStage("toast");
+            
+            setTimeout(() => {
+                setDownloadStage("idle");
+            }, 3000);
+        }, 1500);
     };
 
     return (
-        <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border">
+        <div className="space-y-6 max-w-6xl mx-auto bg-white p-6 rounded-xl shadow-sm border relative">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
                     Rekapitulasi laporan siswa
                 </h1>
-                <button title="download" onClick={downloadCSV} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm active:scale-95 text-sm">
+                <button title="download" onClick={downloadCSV} disabled={downloadStage !== "idle"} className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-sm active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed text-sm">
                     <Download className="w-5 h-5"></Download>Download SpreadSheet (CSV)
                 </button>
             </div>
+            
             <div className="flex gap-4 border-b">
                 <button title="absensi" onClick={() => setActiveTab("absensi")} className={`flex items-center gap-2 px-4 py-3 font-semibold border-b-2 transition-colors ${activeTab === "absensi" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-700"}`}>
                     <CheckSquare className="w-5 h-5 text-black"></CheckSquare>Data Absensi
@@ -277,6 +288,7 @@ export default function RekapDataPage() {
                     <BookOpen className="w-5 h-5 text-black"></BookOpen>Data Nilai
                 </button>
             </div>
+            
             <div className="bg-gray-50 p-4 rounded-lg border flex flex-wrap gap-4 items-end">
                 <div className="w-32">
                     <label htmlFor="kelas" className="block text-sm font-semibold text-blue-700 mb-1">
@@ -378,88 +390,140 @@ export default function RekapDataPage() {
                     </>
                 )}
             </div>
+            
             {loading ? (
                 <div className="text-center p-10 text-gray-500 font-medium animate-pulse">Memuat data...</div>
             ) : (
                 <div className="overflow-x-auto border rounded-lg">
-                    <motion.div initial={{
-                        opacity: 0,
-                        y: 10,
-                    }}
-                    animate={{
-                        opacity: 1,
-                        y: 0,
-                    }}
-                    transition={{
-                        duration: 0.25,
-                    }}>
-                    <table className="w-full text-left text-sm border-collapse">
-                        <thead className="bg-[#1d15ff] border-b text-white">
-                            <tr>
-                                <th className="p-3 w-16 text-center">No</th>
-                                <th className="p-3 w-32">NIS</th>
-                                <th className="p-3 ">Nama Siswa</th>
-                                {activeTab === "absensi" ? (
-                                    reportPeriod === "daily" ? (
-                                        <>
-                                            <th className="p-3 w-32 text-center">Status</th>
-                                            <th className="p-3">Keterangan</th>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <th className="p-3 w-24 text-center">Hadir</th>
-                                            <th className="p-3 w-24 text-center">Sakit</th>
-                                            <th className="p-3 w-24 text-center">Izin</th>
-                                            <th className="p-3 w-24 text-center">Alpha</th>
-                                        </>
-                                    )
-                                ) : (
-                                    <th className="p-3 w-32 text-center">Nilai</th>
-                                )}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {tableData.length > 0 ? tableData.map((row) => (
-                                <tr key={row.nis} className="border-b hover:bg-gray-50">
-                                    <td className="p-3 text-center">{row.no}</td>
-                                    <td className="p-3 text-gray-600 tabular-nums">{row.nis}</td>
-                                    <td className="p-3 font-medium">{row.nama}</td>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={smoothTransition}>
+                        <table className="w-full text-left text-sm border-collapse">
+                            <thead className="bg-[#1d15ff] border-b text-white">
+                                <tr>
+                                    <th className="p-3 w-16 text-center">No</th>
+                                    <th className="p-3 w-32">NIS</th>
+                                    <th className="p-3 ">Nama Siswa</th>
                                     {activeTab === "absensi" ? (
                                         reportPeriod === "daily" ? (
                                             <>
-                                                <td className="p-3 text-center">
-                                                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${row.status === 'Hadir' ? 'bg-green-100 text-green-700' : row.status === 'Sakit' ? 'bg-yellow-100 text-yellow-700' : row.status === 'Izin' ? 'bg-blue-100 text-blue-700' : row.status === 'Alpha' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
-                                                        {row.status}
-                                                    </span>
-                                                </td>
-                                                <td className="p-3 text-gray-600 italic">{row.keterangan}</td>
+                                                <th className="p-3 w-32 text-center">Status</th>
+                                                <th className="p-3">Keterangan</th>
                                             </>
                                         ) : (
                                             <>
-                                                <td className="p-3 text-center font-semibold text-emerald-700">{row.hadir ?? 0}</td>
-                                                <td className="p-3 text-center font-semibold text-amber-700">{row.sakit ?? 0}</td>
-                                                <td className="p-3 text-center font-semibold text-blue-700">{row.izin ?? 0}</td>
-                                                <td className="p-3 text-center font-semibold text-rose-700">{row.alpha ?? 0}</td>
+                                                <th className="p-3 w-24 text-center">Hadir</th>
+                                                <th className="p-3 w-24 text-center">Sakit</th>
+                                                <th className="p-3 w-24 text-center">Izin</th>
+                                                <th className="p-3 w-24 text-center">Alpha</th>
                                             </>
                                         )
                                     ) : (
-                                        <td className="p-3 text-center">
-                                            <span className={`px-2.5 py-1 rounded-md font-bold text-xs uppercase ${row.nilai === 'Belum Diisi' ? 'bg-gray-100 text-gray-500' : isEkskulMapel ? row.nilai === 'A' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : row.nilai === 'B' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-amber-100 text-amber-700 border border-amber-200' : parseInt(row.nilai as string) < 50 ? 'bg-rose-100 text-rose-700 border border-rose-200' : parseInt(row.nilai as string) < 80 ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>
-                                                {row.nilai}
-                                            </span>
-                                        </td>
+                                        <th className="p-3 w-32 text-center">Nilai</th>
                                     )}
                                 </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan={5} className="p-10 text-center text-gray-500">Tidak ada data siswa ditemukan untuk kelas ini.</td>
-                                </tr>
-                            )}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {tableData.length > 0 ? tableData.map((row) => (
+                                    <tr key={row.nis} className="border-b hover:bg-gray-50">
+                                        <td className="p-3 text-center">{row.no}</td>
+                                        <td className="p-3 text-gray-600 tabular-nums">{row.nis}</td>
+                                        <td className="p-3 font-medium">{row.nama}</td>
+                                        {activeTab === "absensi" ? (
+                                            reportPeriod === "daily" ? (
+                                                <>
+                                                    <td className="p-3 text-center">
+                                                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${row.status === 'Hadir' ? 'bg-green-100 text-green-700' : row.status === 'Sakit' ? 'bg-yellow-100 text-yellow-700' : row.status === 'Izin' ? 'bg-blue-100 text-blue-700' : row.status === 'Alpha' ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-500'}`}>
+                                                            {row.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-3 text-gray-600 italic">{row.keterangan}</td>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <td className="p-3 text-center font-semibold text-emerald-700">{row.hadir ?? 0}</td>
+                                                    <td className="p-3 text-center font-semibold text-amber-700">{row.sakit ?? 0}</td>
+                                                    <td className="p-3 text-center font-semibold text-blue-700">{row.izin ?? 0}</td>
+                                                    <td className="p-3 text-center font-semibold text-rose-700">{row.alpha ?? 0}</td>
+                                                </>
+                                            )
+                                        ) : (
+                                            <td className="p-3 text-center">
+                                                <span className={`px-2.5 py-1 rounded-md font-bold text-xs uppercase ${row.nilai === 'Belum Diisi' ? 'bg-gray-100 text-gray-500' : isEkskulMapel ? row.nilai === 'A' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' : row.nilai === 'B' ? 'bg-blue-100 text-blue-700 border border-blue-200' : 'bg-amber-100 text-amber-700 border border-amber-200' : parseInt(row.nilai as string) < 50 ? 'bg-rose-100 text-rose-700 border border-rose-200' : parseInt(row.nilai as string) < 80 ? 'bg-amber-100 text-amber-700 border border-amber-200' : 'bg-emerald-100 text-emerald-700 border border-emerald-200'}`}>
+                                                    {row.nilai}
+                                                </span>
+                                            </td>
+                                        )}
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan={5} className="p-10 text-center text-gray-500">Tidak ada data siswa ditemukan untuk kelas ini.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </motion.div>
                 </div>
             )}
+
+            {/* ======================================================= */}
+            {/* OVERLAY ANIMASI: LOADING & TOAST (MODE: WAIT)           */}
+            {/* ======================================================= */}
+            <AnimatePresence>
+                {downloadStage !== "idle" && (
+                    <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={smoothTransition} className="absolute inset-0" />
+                        
+                        <AnimatePresence mode="wait">
+                            {/* STAGE A: LOADING UNDUHAN (IKON DOKUMEN & PANAH BAWAH) */}
+                            {downloadStage === "loading" && (
+                                <motion.div key="loading-download" {...fadeScale} transition={smoothTransition} className="bg-white w-64 h-64 rounded-2xl flex flex-col items-center justify-center shadow-2xl p-6 relative z-10 border border-slate-100">
+                                    <div className="w-24 h-28 bg-emerald-50 border-2 border-emerald-200 rounded-lg relative flex flex-col items-center justify-center mb-4 overflow-hidden shadow-inner">
+                                        <motion.div animate={{ y: [-25, 25], opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.5, ease: [0.22, 1, 0.36, 1] as const }} className="text-emerald-500 absolute">
+                                            <Download className="w-10 h-10" strokeWidth={2.5} />
+                                        </motion.div>
+                                        <div className="absolute bottom-3 flex flex-col gap-1.5 w-12 items-center">
+                                            <div className="h-1.5 bg-emerald-200 rounded-full w-full" />
+                                            <div className="h-1.5 bg-emerald-200 rounded-full w-4/5" />
+                                            <div className="h-1.5 bg-emerald-200 rounded-full w-full" />
+                                        </div>
+                                    </div>
+                                    <span className="text-sm font-bold text-emerald-600 tracking-wide animate-pulse">Menyiapkan Berkas...</span>
+                                    <span className="text-xs text-slate-400 mt-1 font-medium">Mengekspor ke Spreadsheet</span>
+                                </motion.div>
+                            )}
+
+                            {/* STAGE B: TOAST (BERHASIL / GAGAL) */}
+                            {downloadStage === "toast" && (
+                                <motion.div key="toast-download" {...fadeScale} transition={smoothTransition} className={`flex flex-col items-center justify-center gap-3 px-8 py-6 rounded-2xl shadow-2xl text-white relative z-10 w-80 text-center ${downloadStatus === "success" ? "bg-emerald-600 border border-emerald-500" : "bg-rose-600 border border-rose-500"}`}>
+                                    {downloadStatus === "success" ? (
+                                        <>
+                                            <motion.div initial={{ scale: 0, rotate: -45 }} animate={{ scale: 1, rotate: 0 }} transition={smoothTransition} className="bg-white/20 p-4 rounded-full border border-white/30 shadow-inner">
+                                                <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <motion.path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }} />
+                                                </svg>
+                                            </motion.div>
+                                            <div>
+                                                <h3 className="text-xl font-bold mb-1">Berhasil Diunduh!</h3>
+                                                <p className="text-emerald-100 text-xs font-medium">Berkas CSV sedang diproses browser.</p>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <motion.div animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 1, repeat: Infinity }} className="bg-white/20 p-4 rounded-full border border-white/30">
+                                                <AlertCircle className="w-12 h-12 text-white" />
+                                            </motion.div>
+                                            <div>
+                                                <h3 className="text-xl font-bold mb-1">Gagal Mengunduh</h3>
+                                                <p className="text-rose-100 text-xs font-medium">{downloadErrorMsg}</p>
+                                            </div>
+                                        </>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
+                )}
+            </AnimatePresence>
+
         </div>
     )
 }

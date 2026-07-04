@@ -16,6 +16,80 @@ import { UTApi } from "uploadthing/server";
 
 const utapi = new UTApi();
 
+type KepsekSnapshot = {
+    role?: string;
+    jabatan?: string;
+    jabatanStruktural?: string;
+    jabatanFungsional?: string;
+    mataPelajaran?: string;
+    kelas?: number | null;
+    rombel?: string;
+};
+
+function buildKepsekSnapshot(user: any): KepsekSnapshot {
+    return {
+        role: user?.role || "guru",
+        jabatan: user?.jabatan || "Guru Kelas",
+        jabatanStruktural: user?.jabatanStruktural || "Guru Kelas",
+        jabatanFungsional: user?.jabatanFungsional || "Guru Pertama",
+        mataPelajaran: user?.mataPelajaran || "",
+        kelas: typeof user?.kelas === "number" ? user.kelas : null,
+        rombel: user?.rombel || "",
+    };
+}
+
+async function restoreTeacherFromKepsekSnapshot(userId: string, snapshot?: KepsekSnapshot | null) {
+    const previousState = snapshot || {
+        role: "guru",
+        jabatan: "Guru Kelas",
+        jabatanStruktural: "Guru Kelas",
+        jabatanFungsional: "Guru Pertama",
+        mataPelajaran: "",
+        kelas: null,
+        rombel: "",
+    };
+
+    await User.findByIdAndUpdate(userId, {
+        $set: {
+            role: previousState.role || "guru",
+            jabatan: previousState.jabatan || "Guru Kelas",
+            jabatanStruktural: previousState.jabatanStruktural || "Guru Kelas",
+            jabatanFungsional: previousState.jabatanFungsional || "Guru Pertama",
+            mataPelajaran: previousState.mataPelajaran || "",
+            kelas: typeof previousState.kelas === "number" ? previousState.kelas : null,
+            rombel: previousState.rombel || "",
+            kepsekSnapshot: null,
+        },
+    });
+}
+
+async function applyKepsekTransition(targetUser: any, nextRole: string) {
+    if (nextRole === "kepsek") {
+        const currentKepsek = await User.findOne({ role: "kepsek" });
+        if (currentKepsek && currentKepsek._id.toString() !== targetUser._id.toString()) {
+            await restoreTeacherFromKepsekSnapshot(currentKepsek._id.toString(), currentKepsek.kepsekSnapshot || null);
+        }
+
+        const snapshot = buildKepsekSnapshot(targetUser);
+        await User.findByIdAndUpdate(targetUser._id, {
+            $set: {
+                role: "kepsek",
+                jabatan: "Kepala Sekolah",
+                jabatanStruktural: "Kepala Sekolah",
+                mataPelajaran: "",
+                kelas: null,
+                rombel: "",
+                kepsekSnapshot: snapshot,
+            },
+        });
+        return;
+    }
+
+    if (targetUser?.role === "kepsek") {
+        await restoreTeacherFromKepsekSnapshot(targetUser._id.toString(), targetUser.kepsekSnapshot || null);
+    }
+}
+
 export async function getTeacher() {
     await connectToDatabase();
     const teachers = await User.find({ role: { $ne: "admin" } }).sort({ name: 1 });
@@ -27,13 +101,14 @@ export async function saveTeacher(formData: FormData) {
         await connectToDatabase();
         const id = formData.get("id") as string;
         const jabatanBaru = formData.get("jabatan") as string;
+        const roleValue = (formData.get("role") as string) || "guru";
         const data: any = {
             name: formData.get("name"),
             email: formData.get("email"),
             status: formData.get("status") || "aktif",
             profilePicture: formData.get("profilePicture"),
             idGuru: formData.get("idGuru"),
-            role: formData.get("role"),
+            role: roleValue,
             nip: formData.get("nip"),
             nuptk: formData.get("nuptk"),
             golongan: formData.get("golongan"),
@@ -56,14 +131,52 @@ export async function saveTeacher(formData: FormData) {
             kabupaten: formData.get("kabupaten"),
             provinsi: formData.get("provinsi"),
         };
-        console.log("=== DATA YANG MASUK KE SERVER ===", data);
+
         if(data.idGuru && data.idGuru.trim() !== "") {
             const existingGuru = await User.findOne({idGuru: data.idGuru});
             if(existingGuru && existingGuru._id.toString() !== id) {
                 return{error: "Id sudah terpakai, silahkan gunakan id yang lain"};
             }
         }
+
         if(id) {
+            const existingTeacher = await User.findById(id);
+            if (existingTeacher) {
+                if (roleValue === "kepsek") {
+                    const snapshot = buildKepsekSnapshot(existingTeacher);
+                    data.role = "kepsek";
+                    data.jabatan = "Kepala Sekolah";
+                    data.jabatanStruktural = "Kepala Sekolah";
+                    data.mataPelajaran = "";
+                    data.kelas = null;
+                    data.rombel = "";
+                    data.kepsekSnapshot = snapshot;
+
+                    const currentKepsek = await User.findOne({ role: "kepsek" });
+                    if (currentKepsek && currentKepsek._id.toString() !== id) {
+                        await restoreTeacherFromKepsekSnapshot(currentKepsek._id.toString(), currentKepsek.kepsekSnapshot || null);
+                    }
+                } else if (existingTeacher.role === "kepsek" && roleValue !== "kepsek") {
+                    const snapshot = existingTeacher.kepsekSnapshot || {
+                        role: "guru",
+                        jabatan: "Guru Kelas",
+                        jabatanStruktural: "Guru Kelas",
+                        jabatanFungsional: "Guru Pertama",
+                        mataPelajaran: "",
+                        kelas: null,
+                        rombel: "",
+                    };
+                    data.role = snapshot.role || "guru";
+                    data.jabatan = snapshot.jabatan || "Guru Kelas";
+                    data.jabatanStruktural = snapshot.jabatanStruktural || "Guru Kelas";
+                    data.jabatanFungsional = snapshot.jabatanFungsional || "Guru Pertama";
+                    data.mataPelajaran = snapshot.mataPelajaran || "";
+                    data.kelas = typeof snapshot.kelas === "number" ? snapshot.kelas : null;
+                    data.rombel = snapshot.rombel || "";
+                    data.kepsekSnapshot = null;
+                }
+            }
+
             const password = formData.get("password") as string;
             if (password) {
                 data.password = await bcrypt.hash(password, 10);
@@ -72,13 +185,34 @@ export async function saveTeacher(formData: FormData) {
                 data.emailHash = hashEmail(data.email);
             }
             await User.findByIdAndUpdate(id, data);
-            if(jabatanBaru !== "Guru Kelas"){
+            if(jabatanBaru !== "Guru Kelas") {
                 await ClassRoom.updateMany(
                     {waliKelas: id},
                     {$set: {waliKelas: null}},
                 );
             }
         } else {
+            if (roleValue === "kepsek") {
+                const currentKepsek = await User.findOne({ role: "kepsek" });
+                if (currentKepsek) {
+                    await restoreTeacherFromKepsekSnapshot(currentKepsek._id.toString(), currentKepsek.kepsekSnapshot || null);
+                }
+                data.role = "kepsek";
+                data.jabatan = "Kepala Sekolah";
+                data.jabatanStruktural = "Kepala Sekolah";
+                data.mataPelajaran = "";
+                data.kelas = null;
+                data.rombel = "";
+                data.kepsekSnapshot = {
+                    role: "guru",
+                    jabatan: jabatanBaru || "Guru Kelas",
+                    jabatanStruktural: formData.get("jabatanStruktural") || "Guru Kelas",
+                    jabatanFungsional: formData.get("jabatanFungsional") || "Guru Pertama",
+                    mataPelajaran: formData.get("mataPelajaran") || "",
+                    kelas: formData.get("kelas") ? Number(formData.get("kelas")) : null,
+                    rombel: formData.get("rombel") || "",
+                };
+            }
             const password = formData.get("password") as string;
             data.password = await bcrypt.hash(password, 10);
             data.emailHash = hashEmail(data.email);
@@ -647,13 +781,15 @@ export async function getGuruOnly() {
 export async function updateKepsek(userId: string) {
     try {
         await connectToDatabase();
-        
-        // Remove kepsek role from current kepsek if exists
-        await User.updateOne({ role: "kepsek" }, { $set: { role: "guru" } });
-        
-        // Set new kepsek
-        const result = await User.findByIdAndUpdate(userId, { $set: { role: "kepsek" } }, { new: true });
-        return JSON.parse(JSON.stringify(result.toObject({ getters: true })));
+        const targetUser = await User.findById(userId);
+        if (!targetUser) {
+            throw new Error("Guru tidak ditemukan");
+        }
+
+        await applyKepsekTransition(targetUser, "kepsek");
+
+        const result = await User.findById(userId);
+        return result ? JSON.parse(JSON.stringify(result.toObject({ getters: true }))) : null;
     } catch (error) {
         console.error("Error updating kepsek:", error);
         throw new Error("Gagal mengubah kepala sekolah");
@@ -663,10 +799,13 @@ export async function updateKepsek(userId: string) {
 export async function deleteKepsek() {
     try {
         await connectToDatabase();
-        
-        // Change kepsek back to guru
-        const result = await User.updateOne({ role: "kepsek" }, { $set: { role: "guru" } });
-        return result;
+        const currentKepsek = await User.findOne({ role: "kepsek" });
+        if (!currentKepsek) {
+            return { success: true };
+        }
+
+        await restoreTeacherFromKepsekSnapshot(currentKepsek._id.toString(), currentKepsek.kepsekSnapshot || null);
+        return { success: true };
     } catch (error) {
         console.error("Error deleting kepsek:", error);
         throw new Error("Gagal menghapus kepala sekolah");

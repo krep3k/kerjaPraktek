@@ -7,6 +7,7 @@ const UserSchema = new Schema({
     emailHash: {type: String, required: true, unique: true},
     password: {type: String, required: true},
     role: {type: String, enum: ["admin", "guru", "kepsek", "tu"], default: "guru"},
+    kepsekSnapshot: { type: Object, default: null },
     profilePicture: {type: String, default: ""},
     idGuru: { type: String, default: "", set: encrypt, get: decrypt },
     nip: { type: String, default: "", unique: true, set: encrypt, get: decrypt },

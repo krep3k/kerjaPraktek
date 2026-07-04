@@ -1,5 +1,9 @@
+npm warn "0)" is being parsed as a normal command line argument.
+npm warn "80" is being parsed as a normal command line argument.
+npm warn Unknown cli config "--eq". This will stop working in the next major version of npm.
+npm warn Unknown cli config "--Tail". This will stop working in the next major version of npm.
 
 > sdn-02-serua@0.1.0 build
-> next build ; if errorlevel 1 (echo BUILD_FAILED
+> next build ; $LASTEXITCODE; if ($LASTEXITCODE 0) { Write-Output BUILD_OK } else { Write-Output BUILD_FAILED:$LASTEXITCODE; Get-Content build_output.txt 80 }
 
 Invalid project directory provided, no such directory: C:\Users\fiqri\OneDrive\Documents\kuliah\Kerja praktek\sdn-02-serua\;
