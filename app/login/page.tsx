@@ -1,19 +1,24 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { School, Mail, Lock, LogIn, ArrowLeft } from "lucide-react";
 
 export default function LoginPage(){
     const namaSekolah = "SDN SERUA 02";
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const idleMessage = searchParams.get("reason") === "idle"
-        ? "Sesi Anda telah berakhir karena tidak ada aktivitas selama 1 jam. Silakan login kembali."
-        : "";
+    const [idleMessage, setIdleMessage] = useState("");
+
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const reason = params.get("reason");
+        if (reason === "idle") {
+            setIdleMessage("Sesi Anda telah berakhir karena tidak ada aktivitas selama 1 jam. Silakan login kembali.");
+        }
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
