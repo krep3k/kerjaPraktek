@@ -278,12 +278,28 @@ export async function saveGrade(formData: FormData) {
 export async function addStudents(data: any) {
     try {
         await connectToDatabase();
+        const allStudent = await Student.find();
+        const decryptedStudent = JSON.parse(JSON.stringify(allStudent));
+        const duplicateStudent = decryptedStudent.find((s: any) => {
+            const isNisMatch = String(s.nis) === String(data.nis);
+            const isNisnMatch = data.nisn && String(data.nisn).trim() !== "" && String(s.nisn) === String(data.nisn);
+            return isNisMatch || isNisnMatch;
+        });
+        if(duplicateStudent) {
+            const lokasiKelas = duplicateStudent.rombel ? `kelas ${duplicateStudent.kelas || duplicateStudent.class}-${duplicateStudent.rombel}` : `kelas ${duplicateStudent.kelas || duplicateStudent.class}`;
+            return {
+                error: `NIS atau NISN sudah digunakan oleh siswa bernama "${duplicateStudent.name}" dari ${lokasiKelas}.`
+            };
+        }
         const newStudents = new Student(data);
         await newStudents.save();
         revalidatePath("dashboard/siswa");
         return {success: true};
     } catch (error: any) {
-        return {error: error.message};
+        if (error.code === 11000) {
+            return { error: "Gagal menyimpan: Terdeteksi bentrok data unik NIS/NISN di dalam database." };
+        }
+        return { error: error.message || "Terjadi kesalahan sistem saat menyimpan data." };
     }
 }
 
@@ -334,11 +350,33 @@ export async function saveStudent(formData: FormData) {
 export async function updateStudents(id: string, data: any) {
     try {
         await connectToDatabase();
+        const allStudents = await Student.find();
+        const decryptedStudents = JSON.parse(JSON.stringify(allStudents));
+
+        // Cari duplikat tapi abaikan data milik siswa yang sedang di-update itu sendiri
+        const duplicateStudent = decryptedStudents.find((s: any) => {
+            const isNotSelf = s._id.toString() !== id;
+            
+            const isNisMatch = String(s.nis) === String(data.nis);
+            const isNisnMatch = data.nisn && String(data.nisn).trim() !== "" && String(s.nisn) === String(data.nisn);
+            
+            return isNotSelf && (isNisMatch || isNisnMatch);
+        });
+
+        if (duplicateStudent) {
+            const lokasiKelas = duplicateStudent.rombel ? `kelas ${duplicateStudent.kelas || duplicateStudent.class}-${duplicateStudent.rombel}` : `kelas ${duplicateStudent.kelas || duplicateStudent.class}`;
+            return {
+                error: `NIS atau NISN sudah digunakan oleh siswa bernama "${duplicateStudent.name}" dari ${lokasiKelas}.` 
+            };
+        }
         await Student.findByIdAndUpdate(id, data);
         revalidatePath("dashboard/siswa");
         return {success: true};
     } catch (error: any) {
-        return {error: error.message};
+        if (error.code === 11000) {
+            return { error: "Gagal memperbarui: Terdeteksi bentrok data unik NIS/NISN di dalam database." };
+        }
+        return { error: error.message || "Terjadi kesalahan sistem saat memperbarui data." };
     }
 }
 

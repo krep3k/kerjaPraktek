@@ -35,9 +35,10 @@ const UserSchema = new Schema({
 
 const StudentSchema = new Schema({
     nis: {type: String, required: true, unique: true, set: encrypt, get: decrypt},
-    nisn: {type: String, default: "", set: encrypt, get: decrypt},
+    nisn: {type: String, default: "", sparse: true, unique: true, set: encrypt, get: decrypt},
     name: {type: String, required: true},
     class: {type: Number, required: true, min: 1, max: 6},
+    rombel: {type: String},
     gender: {type: String, enum: ["L", "P"], required: true},
     status: {type: String, enum: ["aktif", "lulus", "keluar"], default: "aktif"},
     profilePicture: {type: String, default: ""},

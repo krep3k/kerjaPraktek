@@ -171,6 +171,8 @@ export default function SiswaPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setFormStage("loading"); // Transisi ke animasi menulis buku
+
+        let isError = false;
         
         try {
             const res = editingId ? await updateStudents(editingId, formData) : await addStudents(formData);
@@ -178,6 +180,7 @@ export default function SiswaPage() {
             if(res.error) {
                 setFormStatus("error");
                 setFormErrorMessage(res.error);
+                isError = true;
             } else {
                 // Refresh Data
                 const normalizedRombel = filterKelas >= 5 && filterRombel === "C" ? "A" : filterRombel;
@@ -189,6 +192,7 @@ export default function SiswaPage() {
             console.error(error);
             setFormStatus("error");
             setFormErrorMessage("Koneksi server terputus.");
+            isError = true;
         }
 
         // Tampilkan Jempol / Error Toast
@@ -197,8 +201,10 @@ export default function SiswaPage() {
             // Reset ke Idle setelah beberapa detik
             setTimeout(() => {
                 setFormStage("idle");
-                setEditingId(null);
-            }, 3500);
+                if(!isError) {
+                    setEditingId(null);
+                }
+            }, isError ? 6000 : 3500);
         }, 1500); // Simulasi delay sebentar agar animasi buku terlihat
     };
 
@@ -603,7 +609,7 @@ export default function SiswaPage() {
                                 <motion.div 
                                     key="toast"
                                     layoutId="form-morph-wrapper"
-                                    className={`flex flex-col items-center justify-center gap-3 px-8 py-6 rounded-2xl shadow-2xl text-white relative z-10 w-80 text-center ${formStatus === "success" ? "bg-blue-600" : "bg-rose-600"}`}
+                                    className={`flex flex-col items-center justify-center gap-3 px-8 py-6 rounded-2xl shadow-2xl text-white relative z-10  text-center ${formStatus === "success" ? "bg-blue-600 w-80" : "bg-rose-600 w-96"}`}
                                 >
                                     {formStatus === "success" ? (
                                         <>
@@ -619,12 +625,12 @@ export default function SiswaPage() {
                                         </>
                                     ) : (
                                         <>
-                                            <motion.div animate={{ x: [-10, 10, -10, 10, 0] }} transition={{ duration: 0.4 }} className="bg-white/20 p-4 rounded-full border border-white/30">
+                                            <motion.div animate={{ x: [-10, 10, -10, 10, 0] }} transition={{ duration: 0.4 }} className="bg-white/20 p-4 rounded-full border border-white/30 shrink-0">
                                                 <AlertCircle className="w-12 h-12 text-white" />
                                             </motion.div>
-                                            <div>
-                                                <h3 className="text-xl font-bold mb-1">Gagal Menyimpan</h3>
-                                                <p className="text-rose-100 text-xs">{formErrorMessage}</p>
+                                            <div className="flex flex-col items-center text-center">
+                                                <h3 className="text-xl font-bold mb-2">Gagal Menyimpan</h3>
+                                                <p className="text-rose-100 text-sm max-w-70 leading-relaxed bg-rose-700/50 p-2 rounded-lg border border-rose-500/50">{formErrorMessage}</p>
                                             </div>
                                         </>
                                     )}
