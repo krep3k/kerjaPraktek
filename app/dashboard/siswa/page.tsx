@@ -539,14 +539,29 @@ export default function SiswaPage() {
                                             <div className="flex gap-4">
                                                 <div className="flex-1">
                                                     <label className="block text-xs font-medium text-blue-700 mb-1">Tingkat Kelas</label>
-                                                    <select value={formData.kelas} onChange={(e) => setFormData({...formData, kelas: Number(e.target.value)})} className="w-full border border-blue-300 rounded-lg px-3 py-2 text-blue-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium">
+                                                    <select 
+                                                        value={formData.kelas} 
+                                                        onChange={(e) => {
+                                                            const newKelas = Number(e.target.value);
+                                                            let newRombel = formData.rombel;
+
+                                                            // Validasi otomatis: Jika ubah ke kelas 5/6 tapi rombel saat ini C, reset otomatis ke A
+                                                            if (newKelas >= 5 && formData.rombel === "C") {
+                                                                newRombel = "A";
+                                                            }
+
+                                                            setFormData({...formData, kelas: newKelas, rombel: newRombel});
+                                                        }}
+                                                        className="w-full border border-blue-300 rounded-lg px-3 py-2 text-blue-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium">
                                                         {[1,2,3,4,5,6].map(k => <option key={k} value={k}>Kelas {k}</option>)}
                                                     </select>
                                                 </div>
                                                 <div className="flex-1">
                                                     <label className="block text-xs font-medium text-blue-700 mb-1">Grup Rombel</label>
                                                     <select value={formData.rombel} onChange={(e) => setFormData({...formData, rombel: e.target.value})} className="w-full border border-blue-300 rounded-lg px-3 py-2 text-blue-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400 font-medium">
-                                                        {["A", "B", "C"].map(r => <option key={r} value={r}>Rombel {r}</option>)}
+                                                        {(formData.kelas <= 4 ? ["A", "B", "C"] : ["A", "B"]).map(r => (
+                                                            <option key={r} value={r}>Rombel {r}</option>
+                                                        ))}
                                                     </select>
                                                 </div>
                                             </div>
